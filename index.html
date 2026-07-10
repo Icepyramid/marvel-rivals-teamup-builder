@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Marvel Rivals S9 Team-Up Builder</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=27">
   </head>
   <body>
     <div class="app-shell">
@@ -69,7 +69,6 @@
             </div>
             <button id="resetLinkColors" type="button" title="Reset every link back to its default green">Reset colors</button>
             <button id="fullLoopTheory" type="button" title="Show the full-web loop theory: the fewest loops (sharing heroes where needed) that touch every eligible hero">Full loop theory</button>
-            <button id="compOnlyView" type="button" title="Clear the board down to just your team comp's icons and their links. Click again to bring your board back">Comp-only view</button>
             <button id="toggleRoute" type="button" title="Pick a start and end hero and highlight the shortest routes between them">Route finder</button>
             <button id="quickSave" type="button" title="Save this board's layout right now (team comp is untouched)">Quick save</button>
             <button id="quickLoad" type="button" title="Reload this board's layout from its last quick save (team comp and view are untouched)">Quick load</button>
@@ -158,6 +157,7 @@
           <div class="comp-head">
             <h3>Team comp</h3>
             <span id="compStats">0/6 heroes</span>
+            <button id="compOnlyView" type="button" title="Clear the board down to just your team comp's icons and their links. Click again to bring your board back">Comp-only view</button>
           </div>
           <div class="comp-slots" id="compSlots"></div>
           <div class="comp-detail hidden" id="compDetail"></div>
@@ -170,6 +170,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=26"></script>
+    <script src="./app.js?v=27"></script>
   </body>
 </html>

@@ -312,8 +312,7 @@ button:disabled {
   padding: 10px 13px;
 }
 
-#fullLoopTheory.active,
-#compOnlyView.active {
+#fullLoopTheory.active {
   background: var(--gold);
   color: #08101d;
   font-weight: 800;
@@ -773,6 +772,28 @@ button:disabled {
   pointer-events: auto;
 }
 
+/* A solid mask a bit larger than the icon itself, sitting behind the
+   portrait but above the link layer. Reducing how often a link passes
+   close enough to an unrelated icon to leave a visible sliver only ever
+   reduced the odds, never eliminated them (nodes can be dragged anywhere).
+   This makes it geometrically impossible: any link within this radius of
+   an icon it isn't connected to is fully covered, no matter where either
+   node sits. A negative z-index keeps it under the portrait/badge/label
+   (all part of this same stacking context) while still painting above the
+   SVG link layer, which sits outside it. */
+.node::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% + 34px);
+  height: calc(100% + 34px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #0a0f1e;
+  z-index: -1;
+}
+
 .node {
   cursor: grab;
   outline: none;
@@ -793,6 +814,11 @@ button.node:active {
   height: 100%;
   border-radius: 50%;
   border: 3px solid var(--role-color);
+  /* A second, subtler outline just outside the role-color ring so every
+     icon reads as a clearly separate object from the board/lines behind
+     it, instead of relying on the role color alone for contrast. */
+  outline: 1.5px solid rgba(255, 255, 255, 0.22);
+  outline-offset: 1.5px;
   background: #10182d;
   overflow: hidden;
 }
@@ -979,7 +1005,6 @@ button.node:active {
 .comp-head {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: 16px;
 }
 
@@ -989,6 +1014,19 @@ button.node:active {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--gold);
+}
+
+#compOnlyView {
+  margin-left: auto;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+#compOnlyView.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #08101d;
+  font-weight: 800;
 }
 
 #compStats {
