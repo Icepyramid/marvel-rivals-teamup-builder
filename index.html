@@ -69,6 +69,7 @@
             </div>
             <button id="resetLinkColors" type="button" title="Reset every link back to its default green">Reset colors</button>
             <button id="fullLoopTheory" type="button" title="Show the full-web loop theory: the fewest loops (sharing heroes where needed) that touch every eligible hero">Full loop theory</button>
+            <button id="compOnlyView" type="button" title="Clear the board down to just your team comp's icons and their links. Click again to bring your board back">Comp-only view</button>
             <button id="toggleRoute" type="button" title="Pick a start and end hero and highlight the shortest routes between them">Route finder</button>
             <button id="quickSave" type="button" title="Save this board's layout right now (team comp is untouched)">Quick save</button>
             <button id="quickLoad" type="button" title="Reload this board's layout from its last quick save (team comp and view are untouched)">Quick load</button>
@@ -105,6 +106,8 @@
               <li>The detail panel offers the <strong>3 shortest loops</strong> back to a hero — show any of them (each in its own color, independently closable).</li>
               <li><strong>Auto arrange</strong> lays the board out with clean horizontal/vertical/diagonal lines; <strong>Back / Forward</strong> undo and redo any action.</li>
               <li><strong>Full loop theory</strong> draws a verified minimum-loop cover of every eligible hero at once, generously spaced, and opens a panel on the right explaining the graph theory behind it. Click again to return to your board.</li>
+              <li><strong>Comp-only view</strong> clears the board down to just your team comp's icons and the links between them — still fully interactive (drag/remove as normal). Click again to bring your board back exactly as it was. Neither this nor showing/hiding a shortest loop ever resizes or re-fits the view.</li>
+              <li><strong>Hold right-click and drag</strong> over empty board space to draw a selection box — every icon inside it gets selected (shown with a blue ring), along with the links between them. Left-click-drag any one of them to move the whole group together; right-click any one of them to remove the whole group at once. A plain right-click (no drag) on empty space clears the selection.</li>
               <li>The detail panel's <strong>Show all partners</strong> / <strong>Show all enhanced</strong> buttons toggle — click again to remove exactly the heroes/links they added (anything still needed by another open loop, route, or the other bulk button stays).</li>
               <li><strong>Route finder</strong> picks a start and end hero and offers the 3 shortest Team-Up routes between them — show one to highlight it on the board in its own color.</li>
               <li><strong>Boards</strong> (top of the sidebar): keep multiple separate boards side by side, each with its own layout + team comp. <strong>+ New</strong> starts a fresh empty one, the dropdown switches between them (auto-saving the one you're leaving), <strong>Save</strong> stores the current board's layout + team comp in this browser, <strong>Delete</strong> removes the current board (you always keep at least one).</li>
@@ -167,6 +170,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=25"></script>
+    <script src="./app.js?v=26"></script>
   </body>
 </html>

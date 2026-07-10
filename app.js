@@ -185,6 +185,35 @@ function roleFilterDimmed(hero) {
 }
 const view = { x: 0, y: 0, scale: 1 };
 
+// Rectangle multi-select: heroes currently selected by holding right-click
+// and dragging a box over the board. Non-persisted UI state — cleared
+// whenever the board's contents get wholesale replaced (reset, undo/redo,
+// board switch, full loop theory, comp-only view).
+const multiSelected = new Set();
+
+function applyMultiSelectionStyles() {
+  state.nodes.forEach((node, hero) => {
+    node.el.classList.toggle("multi-selected", multiSelected.has(hero));
+  });
+}
+
+function clearMultiSelection() {
+  if (!multiSelected.size) return;
+  multiSelected.clear();
+  applyMultiSelectionStyles();
+}
+
+// Right-click one of the selected icons to remove the whole group at once
+// (used by the per-node contextmenu handler when a multi-selection exists).
+function removeMultiSelection() {
+  const heroes = [...multiSelected];
+  multiSelected.clear();
+  heroes.forEach(hero => detachBranch(hero));
+  renderLinks();
+  updateStats();
+  commit();
+}
+
 const SVG_NS = "http://www.w3.org/2000/svg";
 const DEFAULT_LINK_COLOR = "#3ddc71";
 const LINK_COLORS = ["#3ddc71", "#51c2ff", "#ff5b82", "#ffd84f", "#b98bff", "#ffffff"];
@@ -328,7 +357,6 @@ function showLoop(hero, index, cycle) {
   renderLinks();
   updateStats();
   if (state.selected) renderPanel(state.selected);
-  autoFit();
   commit();
 }
 
@@ -404,6 +432,7 @@ function toggleFullLoopTheory() {
   state.links.clear();
   state.hiddenLinks.clear();
   state.selected = null;
+  clearMultiSelection();
   loopState.clear();
   routeState.clear();
   bulkState.clear();
@@ -476,6 +505,72 @@ function toggleFullLoopTheory() {
   commit();
   updateFullLoopButton();
   loopTheoryPanel.classList.remove("hidden");
+}
+
+let compOnlyViewOn = false;
+let compOnlyViewSnapshot = null;
+
+function updateCompOnlyViewButton() {
+  const btn = document.querySelector("#compOnlyView");
+  if (!btn) return;
+  btn.classList.toggle("active", compOnlyViewOn);
+  btn.textContent = compOnlyViewOn ? "Hide comp-only view" : "Comp-only view";
+}
+
+// Toggle: clear the board down to just the team comp's own icons plus the
+// links between them that actually exist — a stripped board you can still
+// drag/remove things on, not a static picture. Click again restores the
+// exact board you had before. Deliberately never touches pan/zoom either
+// way (no autoFit/resetView) per explicit request.
+function toggleCompOnlyView() {
+  if (compOnlyViewOn) {
+    restoreState(compOnlyViewSnapshot);
+    compOnlyViewOn = false;
+    compOnlyViewSnapshot = null;
+    commit();
+    updateCompOnlyViewButton();
+    return;
+  }
+
+  const filled = state.comp.filter(Boolean);
+  if (!filled.length) {
+    window.alert("Add heroes to your team comp first.");
+    return;
+  }
+
+  compOnlyViewSnapshot = snapshotState();
+  state.nodes.forEach(n => n.el.remove());
+  state.nodes.clear();
+  state.links.clear();
+  state.hiddenLinks.clear();
+  state.selected = null;
+  clearMultiSelection();
+  loopState.clear();
+  routeState.clear();
+  bulkState.clear();
+  emptyState.style.display = "none";
+  detailPanel.classList.add("hidden");
+  detailPanel.innerHTML = "";
+
+  // Lay the comp members out around wherever the view already happens to
+  // be centered — not resetting or auto-fitting the view.
+  const center = boardCenter();
+  const radius = Math.max(320, filled.length * 90);
+  filled.forEach((hero, i) => {
+    const angle = -Math.PI / 2 + (i * Math.PI * 2) / filled.length;
+    addNode(hero, center.x + Math.cos(angle) * radius, center.y + Math.sin(angle) * radius);
+  });
+  filled.forEach(a => {
+    (relationships[a] || []).forEach(b => {
+      if (filled.includes(b)) addLink(a, b, "outgoing");
+    });
+  });
+
+  compOnlyViewOn = true;
+  renderLinks();
+  updateStats();
+  commit();
+  updateCompOnlyViewButton();
 }
 
 function closeLinkColorPicker() {
@@ -624,6 +719,7 @@ function restoreState(json) {
   loopState.clear();
   routeState.clear();
   bulkState.clear();
+  clearMultiSelection();
   board.querySelectorAll(".node").forEach(el => el.remove());
   state.nodes.clear();
   state.links.clear();
@@ -667,6 +763,7 @@ function restoreBoardOnly(json) {
   loopState.clear();
   routeState.clear();
   bulkState.clear();
+  clearMultiSelection();
   board.querySelectorAll(".node").forEach(el => el.remove());
   state.nodes.clear();
   state.links.clear();
@@ -923,6 +1020,10 @@ function addNode(hero, x, y, options = {}) {
       fillSlot(pickingSlot, hero);
       return;
     }
+    // A plain click always collapses back to normal single-select — a
+    // rectangle multi-selection only survives a drag-move on one of its
+    // members (handled in startDrag) or a right-click removal.
+    clearMultiSelection();
     // Selecting only (plus confirming any colorless preview links this
     // icon touches) — the panel on the right lists the available links.
     const changed = confirmPreviewLinks(hero);
@@ -933,7 +1034,11 @@ function addNode(hero, x, y, options = {}) {
   el.addEventListener("contextmenu", event => {
     event.preventDefault();
     event.stopPropagation();
-    removeBranch(hero);
+    if (multiSelected.size > 1 && multiSelected.has(hero)) {
+      removeMultiSelection();
+    } else {
+      removeBranch(hero);
+    }
   });
 
   updateStats();
@@ -1648,6 +1753,7 @@ function renderLinks() {
     const path = document.createElementNS(SVG_NS, "path");
     path.classList.add("link", link.target === state.selected ? "incoming" : "outgoing");
     path.classList.toggle("preview", colorless);
+    path.classList.toggle("multi-selected", multiSelected.has(link.source) && multiSelected.has(link.target));
     path.style.setProperty("--link-color", color);
     path.setAttribute("marker-end", "url(#arrowOut)");
     path.setAttribute("d", d);
@@ -1686,6 +1792,9 @@ function linkPath(source, target) {
 }
 
 function startDrag(event) {
+  // Right button is reserved for rectangle multi-select / removal — never
+  // for dragging a node.
+  if (event.button === 2) return;
   const el = event.currentTarget;
   const hero = el.dataset.hero;
   const node = state.nodes.get(hero);
@@ -1693,15 +1802,23 @@ function startDrag(event) {
   el.setPointerCapture(event.pointerId);
   const startX = event.clientX;
   const startY = event.clientY;
-  const origin = { x: node.x, y: node.y };
+
+  // If this hero is part of an active rectangle multi-selection, drag the
+  // whole group together, preserving everyone's relative offsets.
+  const group = multiSelected.size > 1 && multiSelected.has(hero)
+    ? [...multiSelected].map(h => state.nodes.get(h)).filter(Boolean)
+    : [node];
+  const origins = group.map(n => ({ node: n, x: n.x, y: n.y }));
 
   function move(moveEvent) {
     const dx = moveEvent.clientX - startX;
     const dy = moveEvent.clientY - startY;
     if (Math.abs(dx) + Math.abs(dy) > 3) el.dataset.dragged = "true";
-    node.x = origin.x + dx / view.scale;
-    node.y = origin.y + dy / view.scale;
-    positionNode(node);
+    origins.forEach(({ node: n, x, y }) => {
+      n.x = x + dx / view.scale;
+      n.y = y + dy / view.scale;
+      positionNode(n);
+    });
     renderLinks();
   }
 
@@ -1711,11 +1828,10 @@ function startDrag(event) {
     el.removeEventListener("pointerup", up);
     el.removeEventListener("pointercancel", up);
     if (el.dataset.dragged !== "true") return;
-    const slotIndex = compSlotAt(upEvent.clientX, upEvent.clientY);
+    // Dropping onto a comp slot only makes sense for a single hero.
+    const slotIndex = group.length === 1 ? compSlotAt(upEvent.clientX, upEvent.clientY) : -1;
     if (slotIndex !== -1) {
-      node.x = origin.x;
-      node.y = origin.y;
-      positionNode(node);
+      origins.forEach(({ node: n, x, y }) => { n.x = x; n.y = y; positionNode(n); });
       renderLinks();
       fillSlot(slotIndex, hero);
     } else {
@@ -1953,6 +2069,7 @@ function resetBoard() {
   state.hiddenLinks.clear();
   state.selected = null;
   pickingSlot = null;
+  clearMultiSelection();
   loopState.clear();
   routeState.clear();
   bulkState.clear();
@@ -2053,6 +2170,7 @@ document.querySelector("#closeHelp").addEventListener("click", () => helpPanel.c
 
 document.querySelector("#resetLinkColors").addEventListener("click", resetLinkColors);
 document.querySelector("#fullLoopTheory").addEventListener("click", toggleFullLoopTheory);
+document.querySelector("#compOnlyView").addEventListener("click", toggleCompOnlyView);
 
 // ---- Route finder: pick a start/end hero, show up to 3 shortest routes ----
 const routePanel = document.querySelector("#routePanel");
@@ -2247,6 +2365,7 @@ boardWrap.addEventListener("wheel", event => {
 // otherwise a leftover selection could cause a later comp-slot click to
 // unexpectedly "replace" that slot's occupant.
 function deselectHero() {
+  clearMultiSelection();
   if (!state.selected) return;
   state.selected = null;
   document.querySelectorAll(".node.selected").forEach(node => node.classList.remove("selected"));
@@ -2257,8 +2376,86 @@ function deselectHero() {
   renderLinks();
 }
 
+// Hold right-click and drag over empty board space to draw a selection
+// rectangle: every hero whose icon center falls inside it gets added to
+// `multiSelected`. Afterward, dragging any one of the selected icons with
+// the left button moves the whole group together (see startDrag), and
+// right-clicking any one of them removes the whole group (see the node
+// contextmenu handler in addNode / removeMultiSelection).
+function startRectSelect(event) {
+  event.preventDefault();
+  boardWrap.setPointerCapture(event.pointerId);
+  const rect = boardRect();
+  const startX = event.clientX - rect.left;
+  const startY = event.clientY - rect.top;
+  const box = document.createElement("div");
+  box.className = "rect-select-box";
+  boardWrap.append(box);
+  let dragged = false;
+
+  const paintBox = (curX, curY) => {
+    box.style.left = `${Math.min(startX, curX)}px`;
+    box.style.top = `${Math.min(startY, curY)}px`;
+    box.style.width = `${Math.abs(curX - startX)}px`;
+    box.style.height = `${Math.abs(curY - startY)}px`;
+  };
+
+  const move = moveEvent => {
+    const curX = moveEvent.clientX - rect.left;
+    const curY = moveEvent.clientY - rect.top;
+    if (Math.abs(curX - startX) + Math.abs(curY - startY) > 4) dragged = true;
+    paintBox(curX, curY);
+  };
+
+  const up = upEvent => {
+    boardWrap.releasePointerCapture(event.pointerId);
+    boardWrap.removeEventListener("pointermove", move);
+    boardWrap.removeEventListener("pointerup", up);
+    boardWrap.removeEventListener("pointercancel", up);
+    box.remove();
+    if (!dragged) {
+      // A plain right-click on empty space just clears any selection.
+      clearMultiSelection();
+      return;
+    }
+    const curX = upEvent.clientX - rect.left;
+    const curY = upEvent.clientY - rect.top;
+    const left = Math.min(startX, curX);
+    const top = Math.min(startY, curY);
+    const right = Math.max(startX, curX);
+    const bottom = Math.max(startY, curY);
+    // Screen rect -> world rect through the current pan/zoom transform.
+    const worldLeft = (left - view.x) / view.scale;
+    const worldTop = (top - view.y) / view.scale;
+    const worldRight = (right - view.x) / view.scale;
+    const worldBottom = (bottom - view.y) / view.scale;
+    multiSelected.clear();
+    state.nodes.forEach((node, hero) => {
+      if (node.x >= worldLeft && node.x <= worldRight && node.y >= worldTop && node.y <= worldBottom) {
+        multiSelected.add(hero);
+      }
+    });
+    applyMultiSelectionStyles();
+    renderLinks();
+  };
+
+  boardWrap.addEventListener("pointermove", move);
+  boardWrap.addEventListener("pointerup", up);
+  boardWrap.addEventListener("pointercancel", up);
+}
+
+// Right-click on empty board space is reserved for rectangle-select — never
+// let it also open the browser's native context menu.
+boardWrap.addEventListener("contextmenu", event => {
+  if (event.target === boardWrap || event.target === board) event.preventDefault();
+});
+
 boardWrap.addEventListener("pointerdown", event => {
   if (event.target !== boardWrap && event.target !== board) return;
+  if (event.button === 2) {
+    startRectSelect(event);
+    return;
+  }
   // Without this, holding the middle mouse button also triggers the
   // browser's own native auto-scroll cursor/icon on top of our drag-to-pan,
   // which fights with it.
@@ -2417,6 +2614,7 @@ function clearWorkingBoard() {
   state.comp = Array(6).fill(null);
   state.compOwned = Array(6).fill(false);
   pickingSlot = null;
+  clearMultiSelection();
   loopState.clear();
   routeState.clear();
   bulkState.clear();

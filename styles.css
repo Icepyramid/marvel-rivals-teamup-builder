@@ -312,7 +312,8 @@ button:disabled {
   padding: 10px 13px;
 }
 
-#fullLoopTheory.active {
+#fullLoopTheory.active,
+#compOnlyView.active {
   background: var(--gold);
   color: #08101d;
   font-weight: 800;
@@ -855,6 +856,24 @@ button.node:active {
 
 .node.selected .node-core {
   border-color: var(--gold);
+}
+
+/* Rectangle multi-select highlight — distinct from the single gold
+   "selected" ring so both can coexist without being confused. */
+.node.multi-selected .node-core {
+  box-shadow: 0 0 0 4px rgba(81, 194, 255, 0.55);
+}
+
+.link.multi-selected {
+  filter: drop-shadow(0 0 3px rgba(81, 194, 255, 0.85));
+}
+
+.rect-select-box {
+  position: absolute;
+  border: 2px dashed rgba(81, 194, 255, 0.85);
+  background: rgba(81, 194, 255, 0.12);
+  pointer-events: none;
+  z-index: 9;
 }
 
 .node.colorless .node-core {
