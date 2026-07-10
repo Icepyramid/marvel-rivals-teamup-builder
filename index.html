@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Marvel Rivals S9 Team-Up Builder</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="eyebrow">Marvel Rivals S9</span>
+          <h1>Team-Up Builder</h1>
+          <p>Start from any hero, expand Team-Up partners and enhanced heroes, then drag the board into your own comp shape.</p>
+        </div>
+
+        <div class="controls">
+          <label for="boardSelect">Board</label>
+          <div class="boards-bar">
+            <select id="boardSelect" aria-label="Choose board"></select>
+            <button id="newBoard" type="button" title="Create a new empty board">+ New</button>
+            <button id="saveBoardBtn" type="button" title="Save this board's layout and team comp">Save</button>
+            <button id="deleteBoard" type="button" title="Delete this board">Delete</button>
+          </div>
+        </div>
+
+        <div class="controls">
+          <label for="heroSearch">Hero search</label>
+          <div class="search-row">
+            <input id="heroSearch" type="search" placeholder="Type a hero name...">
+            <button id="resetBoard" type="button" title="Clear board">Reset</button>
+          </div>
+        </div>
+
+        <div class="legend" role="group" aria-label="Filter heroes by role">
+          <button class="legend-item vanguard" type="button">Vanguard</button>
+          <button class="legend-item duelist" type="button">Duelist</button>
+          <button class="legend-item strategist" type="button">Strategist</button>
+          <button class="legend-item flex" type="button">Flex</button>
+        </div>
+        <p class="legend-hint">Click a role to filter the list. Click again to clear.</p>
+
+        <div class="hero-list" id="heroList" aria-label="Hero picker"></div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <h2 id="focusTitle">Empty board</h2>
+            <p id="focusCopy">Pick a hero from the left. The board will show its Team-Up partners and who it enhances.</p>
+          </div>
+          <div class="toolbar">
+            <button id="undoStep" type="button" title="Recall last step">&#8617; Back</button>
+            <button id="redoStep" type="button" title="Forward step">&#8618; Forward</button>
+            <button id="autoLayout" type="button">Auto arrange</button>
+            <button id="expandVisible" type="button">Expand visible</button>
+            <button id="hideLabels" type="button">Labels on</button>
+            <div class="filter-group" role="group" aria-label="Link filter">
+              <button id="filterAll" type="button" class="active" title="Show every link">All</button>
+              <button id="filterIn" type="button" title="Only Team-Up partners that enhance the selected hero">Partners</button>
+              <button id="filterOut" type="button" title="Only heroes the selected hero enhances">Enhances</button>
+            </div>
+            <div class="filter-group" role="group" aria-label="Board role filter">
+              <button id="boardRoleVanguard" type="button" title="Only Vanguard-related icons/links stay colored; the rest go colorless (Flex is always shown)">Vanguard</button>
+              <button id="boardRoleDuelist" type="button" title="Only Duelist-related icons/links stay colored; the rest go colorless (Flex is always shown)">Duelist</button>
+              <button id="boardRoleStrategist" type="button" title="Only Strategist-related icons/links stay colored; the rest go colorless (Flex is always shown)">Strategist</button>
+            </div>
+            <button id="resetLinkColors" type="button" title="Reset every link back to its default green">Reset colors</button>
+            <button id="fullLoopTheory" type="button" title="Show the full-web loop theory: the fewest loops (sharing heroes where needed) that touch every eligible hero">Full loop theory</button>
+            <button id="toggleRoute" type="button" title="Pick a start and end hero and highlight the shortest routes between them">Route finder</button>
+            <button id="quickSave" type="button" title="Save this board right now (same as the sidebar Save)">Quick save</button>
+            <button id="quickLoad" type="button" title="Reload this board's last save, discarding unsaved changes">Quick load</button>
+            <button id="exportBoardImage" type="button" title="Download a clean, shareable picture of the board">📷 Board image</button>
+            <button id="exportCompImage" type="button" title="Download a clean, shareable picture of the team comp">📷 Comp image</button>
+            <button id="toggleHelp" type="button" title="Show controls">? Controls</button>
+          </div>
+        </header>
+
+        <section class="board-wrap">
+          <svg id="linkLayer" aria-hidden="true"></svg>
+          <div id="board" class="board" aria-label="Interactive team-up board">
+            <div class="empty-state" id="emptyState">
+              <h3>Choose a starting hero</h3>
+              <p>The first click creates a local relationship map. Click any node to see its own Team-Up partners and who it enhances.</p>
+            </div>
+          </div>
+          <aside id="detailPanel" class="detail-panel hidden" aria-label="Selected hero relationships"></aside>
+          <aside id="helpPanel" class="help-panel hidden" aria-label="Controls guide">
+            <div class="panel-head">
+              <span class="eyebrow">How to navigate</span>
+              <button id="closeHelp" class="panel-close" type="button" title="Hide controls">×</button>
+            </div>
+            <ul>
+              <li><strong>Click</strong> a hero (sidebar, board, panel, or comp) to select it.</li>
+              <li><strong>Drag</strong> any hero icon from anywhere and drop it exactly on the board to place it there.</li>
+              <li><strong>Drag</strong> a board icon to move it; drag it onto a comp slot to add it to your team.</li>
+              <li><strong>Right-click</strong> a board icon to remove it (and anything left link-less).</li>
+              <li><strong>Right-click</strong> a link to recolor it (first swatch resets to green); <strong>click</strong> a link to hide it, click the same spot again to bring it back; <strong>Reset colors</strong> reverts every link to green at once.</li>
+              <li>The very first hero placed reveals its full web in colorless "preview" links — click an icon to confirm its link.</li>
+              <li><strong>Empty comp slot:</strong> click it (arms it — next hero click fills it), or select a hero first and click the slot.</li>
+              <li><strong>Filled comp slot:</strong> click to bring it onto the board; select a different hero first and click to replace it; right-click to clear it.</li>
+              <li><strong>Scroll</strong> to zoom the board; drag empty board space (left-click or middle-click) to pan.</li>
+              <li><strong>Middle-click and drag</strong> (the mouse's 3rd/scroll-wheel button) to scroll the hero list, the detail panel, this controls panel, and any other scrollable list — an alternative to hunting for a scrollbar.</li>
+              <li>The detail panel offers the <strong>3 shortest loops</strong> back to a hero — show any of them (each in its own color, independently closable).</li>
+              <li><strong>Auto arrange</strong> lays the board out with clean horizontal/vertical/diagonal lines; <strong>Back / Forward</strong> undo and redo any action.</li>
+              <li><strong>Full loop theory</strong> draws a verified minimum-loop cover of every eligible hero at once, generously spaced, and opens a panel on the right explaining the graph theory behind it. Click again to return to your board.</li>
+              <li>The detail panel's <strong>Show all partners</strong> / <strong>Show all enhanced</strong> buttons toggle — click again to remove exactly the heroes/links they added (anything still needed by another open loop, route, or the other bulk button stays).</li>
+              <li><strong>Route finder</strong> picks a start and end hero and offers the 3 shortest Team-Up routes between them — show one to highlight it on the board in its own color.</li>
+              <li><strong>Boards</strong> (top of the sidebar): keep multiple separate boards side by side. <strong>+ New</strong> starts a fresh empty one, the dropdown switches between them (auto-saving the one you're leaving), <strong>Save</strong> stores the current board's layout + team comp in this browser, <strong>Delete</strong> removes the current board (you always keep at least one). <strong>Quick save / Quick load</strong> in the toolbar do the same save/reload for whichever board is active, without leaving the board view.</li>
+              <li><strong>📷 Board image / 📷 Comp image</strong> download a clean, separately-arranged picture of just the board or just the team comp (not a raw screenshot) — good for sharing outside the app.</li>
+              <li>Drag the small handle above <strong>Team comp</strong> up or down to resize how much of the workspace it takes.</li>
+            </ul>
+          </aside>
+          <div class="zoom-controls">
+            <button id="zoomIn" type="button" title="Zoom in">+</button>
+            <button id="zoomOut" type="button" title="Zoom out">&#8722;</button>
+            <button id="zoomFit" type="button" title="Fit everything on screen">Fit</button>
+          </div>
+          <aside id="easterEggPanel" class="help-panel hidden" aria-label="Behind the scenes">
+            <div class="panel-head">
+              <span class="eyebrow">Behind the scenes</span>
+              <button id="closeEasterEgg" class="panel-close" type="button" title="Close">×</button>
+            </div>
+            <ul id="easterEggList"></ul>
+          </aside>
+          <aside id="routePanel" class="help-panel hidden" aria-label="Route finder">
+            <div class="panel-head">
+              <span class="eyebrow">Route finder</span>
+              <button id="closeRoute" class="panel-close" type="button" title="Close">×</button>
+            </div>
+            <p class="panel-hint">Pick a start and end hero to see the shortest Team-Up routes between them.</p>
+            <div class="route-form">
+              <label for="routeStart">Start hero</label>
+              <select id="routeStart"></select>
+              <label for="routeEnd">End hero</label>
+              <select id="routeEnd"></select>
+              <button id="findRoutes" type="button">Find shortest routes</button>
+            </div>
+            <div id="routeResults" class="route-results"></div>
+          </aside>
+          <aside id="loopTheoryPanel" class="help-panel hidden" aria-label="Full loop theory explained">
+            <div class="panel-head">
+              <span class="eyebrow">Full loop theory, explained</span>
+              <button id="closeLoopTheory" class="panel-close" type="button" title="Close">×</button>
+            </div>
+            <p class="panel-hint">This button asks: what's the fewest loops — sharing heroes where needed — that together touch every hero who can ever be part of a loop at all? Here's the graph theory behind it.</p>
+            <ul id="loopTheoryFactsList"></ul>
+          </aside>
+        </section>
+
+        <section class="comp-tray" aria-label="Team comp builder">
+          <div id="compResizeHandle" class="comp-resize-handle" title="Drag to resize the team comp area"></div>
+          <div class="comp-head">
+            <h3>Team comp</h3>
+            <span id="compStats">0/6 heroes</span>
+          </div>
+          <div class="comp-slots" id="compSlots"></div>
+          <div class="comp-detail hidden" id="compDetail"></div>
+        </section>
+
+        <footer class="statusbar">
+          <span id="boardStats">0 heroes on board</span>
+          <span>Drag icons freely. Lines update live. <button id="easterEgg" class="easter-egg-btn" type="button" title="???">&#129371;</button></span>
+        </footer>
+      </main>
+    </div>
+
+    <script src="./app.js?v=23"></script>
+  </body>
+</html>
