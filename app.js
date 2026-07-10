@@ -649,6 +649,44 @@ function restoreState(json) {
   renderRoutePanel();
 }
 
+// Board-only counterpart to snapshotState/restoreState, used solely by the
+// toolbar's Quick save/Quick load: never includes (or touches) the team
+// comp, and restoring never resets the view — the board reappears exactly
+// where it already was, just with its layout/links reset to the save.
+function snapshotBoardOnly() {
+  return JSON.stringify({
+    nodes: [...state.nodes.values()].map(n => ({ hero: n.hero, x: n.x, y: n.y })),
+    links: [...state.links.values()],
+    hidden: [...state.hiddenLinks],
+    selected: state.selected
+  });
+}
+
+function restoreBoardOnly(json) {
+  const snap = JSON.parse(json);
+  loopState.clear();
+  routeState.clear();
+  bulkState.clear();
+  board.querySelectorAll(".node").forEach(el => el.remove());
+  state.nodes.clear();
+  state.links.clear();
+  state.hiddenLinks = new Set(snap.hidden);
+  state.selected = null;
+  snap.nodes.forEach(n => addNode(n.hero, n.x, n.y));
+  snap.links.forEach(l => state.links.set(linkId(l.source, l.target, l.type), l));
+  if (snap.selected && state.nodes.has(snap.selected)) {
+    selectHero(snap.selected);
+  } else {
+    focusTitle.textContent = "Empty board";
+    focusCopy.textContent = "Pick a hero from the left. The board will show its Team-Up partners and who it enhances.";
+    detailPanel.classList.add("hidden");
+    detailPanel.innerHTML = "";
+  }
+  emptyState.style.display = state.nodes.size ? "none" : "block";
+  renderLinks();
+  updateStats();
+}
+
 function undo() {
   if (history.past.length < 2) return;
   history.future.push(history.past.pop());
@@ -1583,12 +1621,14 @@ function renderLinks() {
     // `updateLinkHitWidths()` keeps every hit-path's width correct as the
     // zoom changes afterward too.
     hit.style.strokeWidth = `${LINK_HIT_SCREEN_WIDTH / view.scale}px`;
-    hit.addEventListener("contextmenu", event => {
-      event.preventDefault();
+    // Left-click recolors a link, right-click hides/reveals it (swapped
+    // from the previous click=hide / right-click=recolor per user request).
+    hit.addEventListener("click", event => {
       event.stopPropagation();
       openLinkColorPicker(id, event.clientX, event.clientY);
     });
-    hit.addEventListener("click", event => {
+    hit.addEventListener("contextmenu", event => {
+      event.preventDefault();
       event.stopPropagation();
       toggleLinkHidden(id);
     });
@@ -2328,6 +2368,10 @@ const BOARDS_INDEX_KEY = "teamup-boards-index";
 const ACTIVE_BOARD_KEY = "teamup-active-board";
 const LEGACY_SAVE_KEY = "teamup-board-save-v1"; // single-slot save from a prior version
 const boardDataKey = name => `teamup-board::${name}`;
+// Separate from the full per-board save above: the toolbar's Quick save/
+// Quick load only ever touch the board's hero layout/links, never the team
+// comp, and never move the view.
+const quickSaveKey = name => `teamup-quicksave::${name}`;
 
 function loadBoardsIndex() {
   try {
@@ -2435,11 +2479,23 @@ function saveCurrentBoard(triggerButton) {
   flashButton(triggerButton, "Saved!");
 }
 
-// Toolbar convenience shortcut: reload the active board's last save,
-// discarding whatever unsaved changes are on it right now.
+// Toolbar Quick save/Quick load: board layout + links ONLY. Never touches
+// the team comp, and never moves/resets the view — a plain reload of the
+// current pan/zoom with the saved layout dropped back in.
+function quickSaveBoard(triggerButton) {
+  localStorage.setItem(quickSaveKey(activeBoardName), snapshotBoardOnly());
+  flashButton(triggerButton, "Saved!");
+}
+
 function quickLoadBoard(triggerButton) {
-  if (!window.confirm("Reload this board from its last save? Any unsaved changes will be lost.")) return;
-  loadNamedBoard(activeBoardName);
+  const saved = localStorage.getItem(quickSaveKey(activeBoardName));
+  if (!saved) {
+    flashButton(triggerButton, "No quick save yet");
+    return;
+  }
+  if (!window.confirm("Reload this board's layout from its last quick save? Unsaved board changes will be lost. (Team comp is untouched.)")) return;
+  restoreBoardOnly(saved);
+  commit();
   flashButton(triggerButton, "Loaded!");
 }
 
@@ -2450,6 +2506,7 @@ function deleteCurrentBoard() {
   }
   if (!window.confirm(`Delete board "${activeBoardName}"? This can't be undone.`)) return;
   localStorage.removeItem(boardDataKey(activeBoardName));
+  localStorage.removeItem(quickSaveKey(activeBoardName));
   boardsIndex = boardsIndex.filter(name => name !== activeBoardName);
   localStorage.setItem(BOARDS_INDEX_KEY, JSON.stringify(boardsIndex));
   activeBoardName = boardsIndex[0];
@@ -2466,11 +2523,10 @@ document.querySelector("#newBoard").addEventListener("click", createNewBoard);
 document.querySelector("#saveBoardBtn").addEventListener("click", event => saveCurrentBoard(event.currentTarget));
 document.querySelector("#deleteBoard").addEventListener("click", deleteCurrentBoard);
 
-// Toolbar quick save/load — a one-click shortcut for the active board,
-// brought back after the sidebar board-switcher replaced the old single-
-// slot toolbar buttons (the sidebar "Save" does the same save; this is
-// just closer at hand while working on the board itself).
-document.querySelector("#quickSave").addEventListener("click", event => saveCurrentBoard(event.currentTarget));
+// Toolbar quick save/load — board layout only (never the team comp, never
+// the view/zoom), a fast in-place checkpoint distinct from the sidebar's
+// full board+comp Save.
+document.querySelector("#quickSave").addEventListener("click", event => quickSaveBoard(event.currentTarget));
 document.querySelector("#quickLoad").addEventListener("click", event => quickLoadBoard(event.currentTarget));
 
 // ---- Shareable images: separate, clean exports for the board and the team
@@ -2694,9 +2750,51 @@ async function drawBoardContent(ctx, x, y, w, h) {
   }
 }
 
+// A lightweight companion to the board diagram: just the team comp's 6
+// icons neatly laid out in a row — no arrows, no ring rearrangement (that
+// belongs to the standalone Comp image) — enough context to see who's on
+// the comp without the visual complexity of `drawCompContent`.
+async function drawCompIconsRow(ctx, x, y, w, h) {
+  const slots = state.comp;
+  const r = Math.max(20, Math.min(40, w / 14, h / 2.4));
+  const gap = w / 6;
+  const cy = y + h / 2;
+  const portraits = new Map();
+  await Promise.all(slots.filter(Boolean).map(async hero => portraits.set(hero, await loadLocalPortrait(hero))));
+  slots.forEach((hero, i) => {
+    const cx = x + gap * i + gap / 2;
+    if (hero) {
+      drawHeroCircle(ctx, portraits.get(hero), hero, roleColors[roleOf(hero)], cx, cy, r);
+      ctx.fillStyle = "#f5f7ff";
+      ctx.font = "700 14px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText(hero, cx, cy + r + 8);
+    } else {
+      ctx.save();
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+      ctx.font = "400 12px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText("Empty", cx, cy + r + 8);
+    }
+  });
+}
+
 async function buildBoardImageCanvas() {
   const W = 1600;
-  const H = 1150;
+  const headerH = 182;
+  const boardH = 980;
+  const compRowH = 170;
+  const footerH = 60;
+  const H = headerH + boardH + compRowH + footerH;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -2709,7 +2807,16 @@ async function buildBoardImageCanvas() {
     `${activeBoardName} · ${state.nodes.size} hero${state.nodes.size === 1 ? "" : "es"} · ${state.links.size} link${state.links.size === 1 ? "" : "s"}`
   );
   drawLegend(ctx, 48, 152);
-  await drawBoardContent(ctx, 48, 182, W - 96, H - 182 - 60);
+  await drawBoardContent(ctx, 48, headerH, W - 96, boardH);
+
+  let y = headerH + boardH;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#ffdc49";
+  ctx.font = "700 15px Arial";
+  ctx.fillText("TEAM COMP", 48, y + 20);
+  await drawCompIconsRow(ctx, 48, y + 30, W - 96, compRowH - 30);
+
   drawCardFooter(ctx, W, H);
   return canvas;
 }
@@ -2732,9 +2839,13 @@ async function drawCompContent(ctx, x, y, w, h) {
   const slots = state.comp;
   const cx0 = x + w / 2;
   const cy0 = y + h / 2;
-  const r = Math.max(36, Math.min(64, Math.min(w, h) / 8));
+  // Smaller icons than the first version, and links stop well short of the
+  // circle edge (not just a few px) — both per direct feedback that the
+  // arrows were too hard to read up against the portraits.
+  const r = Math.max(22, Math.min(42, Math.min(w, h) / 11));
+  const linkClearance = Math.max(20, r * 0.6);
   const labelGap = 34;
-  const R = Math.max(80, Math.min(w, h) / 2 - r - labelGap - 30);
+  const R = Math.max(90, Math.min(w, h) / 2 - r - labelGap - 30);
 
   const positions = slots.map((hero, i) => {
     const angle = -Math.PI / 2 + (i * Math.PI * 2) / 6;
@@ -2749,7 +2860,7 @@ async function drawCompContent(ctx, x, y, w, h) {
     for (const b of filled) {
       if (a === b) continue;
       if ((relationships[a.hero] || []).includes(b.hero)) {
-        const seg = trimSegment(a, b, r, r);
+        const seg = trimSegment(a, b, r + linkClearance, r + linkClearance);
         drawArrowLink(ctx, seg.start, seg.end, "#3ddc71");
       }
     }
@@ -2805,45 +2916,6 @@ async function buildCompImageCanvas() {
   return canvas;
 }
 
-async function buildFullCardCanvas() {
-  const W = 1600;
-  const headerH = 182;
-  const boardH = 980;
-  const sectionGap = 30;
-  const compH = 900;
-  const footerH = 60;
-  const H = headerH + boardH + sectionGap + compH + footerH;
-  const canvas = document.createElement("canvas");
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext("2d");
-  drawCardBackground(ctx, W, H);
-  drawCardHeader(
-    ctx,
-    "MARVEL RIVALS S9",
-    "Team-Up Builder",
-    `${activeBoardName} · ${state.nodes.size} hero${state.nodes.size === 1 ? "" : "es"} on board · ${compStatsLine()}`
-  );
-  drawLegend(ctx, 48, 152);
-
-  let y = headerH;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = "#ffdc49";
-  ctx.font = "700 16px Arial";
-  ctx.fillText("BOARD", 48, y + 18);
-  await drawBoardContent(ctx, 48, y + 34, W - 96, boardH - 34);
-  y += boardH + sectionGap;
-
-  ctx.fillStyle = "#ffdc49";
-  ctx.font = "700 16px Arial";
-  ctx.fillText("TEAM COMP", 48, y + 18);
-  await drawCompContent(ctx, 48, y + 34, W - 96, compH - 34);
-
-  drawCardFooter(ctx, W, H);
-  return canvas;
-}
-
 function downloadCanvas(canvas, filename) {
   const a = document.createElement("a");
   a.href = canvas.toDataURL("image/png");
@@ -2871,4 +2943,3 @@ async function exportImage(buildFn, filenamePrefix, triggerButton) {
 
 document.querySelector("#exportBoardImage").addEventListener("click", event => exportImage(buildBoardImageCanvas, "teamup-board", event.currentTarget));
 document.querySelector("#exportCompImage").addEventListener("click", event => exportImage(buildCompImageCanvas, "teamup-comp", event.currentTarget));
-document.querySelector("#exportFullImage").addEventListener("click", event => exportImage(buildFullCardCanvas, "teamup-full", event.currentTarget));

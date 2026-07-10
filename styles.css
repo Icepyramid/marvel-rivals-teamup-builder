@@ -318,6 +318,21 @@ button:disabled {
   font-weight: 800;
 }
 
+/* Permanently highlighted (not just on hover) and first in the toolbar so
+   it doesn't get lost among a dozen other buttons — this was flagged as
+   too easy to miss. */
+.help-spotlight {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #08101d;
+  font-weight: 800;
+}
+
+.help-spotlight:hover {
+  background: #ffe673;
+  border-color: #ffe673;
+}
+
 .board-wrap {
   position: relative;
   min-height: 0;

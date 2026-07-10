@@ -51,6 +51,7 @@
             <p id="focusCopy">Pick a hero from the left. The board will show its Team-Up partners and who it enhances.</p>
           </div>
           <div class="toolbar">
+            <button id="toggleHelp" class="help-spotlight" type="button" title="Show controls">❓ Controls</button>
             <button id="undoStep" type="button" title="Recall last step">&#8617; Back</button>
             <button id="redoStep" type="button" title="Forward step">&#8618; Forward</button>
             <button id="autoLayout" type="button">Auto arrange</button>
@@ -69,12 +70,10 @@
             <button id="resetLinkColors" type="button" title="Reset every link back to its default green">Reset colors</button>
             <button id="fullLoopTheory" type="button" title="Show the full-web loop theory: the fewest loops (sharing heroes where needed) that touch every eligible hero">Full loop theory</button>
             <button id="toggleRoute" type="button" title="Pick a start and end hero and highlight the shortest routes between them">Route finder</button>
-            <button id="quickSave" type="button" title="Save this board right now (same as the sidebar Save)">Quick save</button>
-            <button id="quickLoad" type="button" title="Reload this board's last save, discarding unsaved changes">Quick load</button>
+            <button id="quickSave" type="button" title="Save this board's layout right now (team comp is untouched)">Quick save</button>
+            <button id="quickLoad" type="button" title="Reload this board's layout from its last quick save (team comp and view are untouched)">Quick load</button>
             <button id="exportBoardImage" type="button" title="Download a clean, shareable picture of the board">📷 Board image</button>
             <button id="exportCompImage" type="button" title="Download a clean, shareable picture of the team comp">📷 Comp image</button>
-            <button id="exportFullImage" type="button" title="Download one combined picture with both the board and the team comp">📷 Full card</button>
-            <button id="toggleHelp" type="button" title="Show controls">? Controls</button>
           </div>
         </header>
 
@@ -97,7 +96,7 @@
               <li><strong>Drag</strong> any hero icon from anywhere and drop it exactly on the board to place it there.</li>
               <li><strong>Drag</strong> a board icon to move it; drag it onto a comp slot to add it to your team.</li>
               <li><strong>Right-click</strong> a board icon to remove it (and anything left link-less).</li>
-              <li><strong>Right-click</strong> a link to recolor it (first swatch resets to green); <strong>click</strong> a link to hide it, click the same spot again to bring it back; <strong>Reset colors</strong> reverts every link to green at once.</li>
+              <li><strong>Left-click</strong> a link to recolor it (first swatch resets to green); <strong>right-click</strong> a link to hide it, right-click the same spot again to bring it back; <strong>Reset colors</strong> reverts every link to green at once.</li>
               <li>The very first hero placed reveals its full web in colorless "preview" links — click an icon to confirm its link.</li>
               <li><strong>Empty comp slot:</strong> click it (arms it — next hero click fills it), or select a hero first and click the slot.</li>
               <li><strong>Filled comp slot:</strong> click to bring it onto the board; select a different hero first and click to replace it; right-click to clear it.</li>
@@ -108,8 +107,9 @@
               <li><strong>Full loop theory</strong> draws a verified minimum-loop cover of every eligible hero at once, generously spaced, and opens a panel on the right explaining the graph theory behind it. Click again to return to your board.</li>
               <li>The detail panel's <strong>Show all partners</strong> / <strong>Show all enhanced</strong> buttons toggle — click again to remove exactly the heroes/links they added (anything still needed by another open loop, route, or the other bulk button stays).</li>
               <li><strong>Route finder</strong> picks a start and end hero and offers the 3 shortest Team-Up routes between them — show one to highlight it on the board in its own color.</li>
-              <li><strong>Boards</strong> (top of the sidebar): keep multiple separate boards side by side. <strong>+ New</strong> starts a fresh empty one, the dropdown switches between them (auto-saving the one you're leaving), <strong>Save</strong> stores the current board's layout + team comp in this browser, <strong>Delete</strong> removes the current board (you always keep at least one). <strong>Quick save / Quick load</strong> in the toolbar do the same save/reload for whichever board is active, without leaving the board view.</li>
-              <li><strong>📷 Board image / 📷 Comp image / 📷 Full card</strong> download clean, arrow-and-legend-annotated pictures (not raw screenshots) — separately, or combined in one image — good for sharing outside the app. The team comp is drawn as a ring so you can see exactly who upgrades whom inside your 6-hero team.</li>
+              <li><strong>Boards</strong> (top of the sidebar): keep multiple separate boards side by side, each with its own layout + team comp. <strong>+ New</strong> starts a fresh empty one, the dropdown switches between them (auto-saving the one you're leaving), <strong>Save</strong> stores the current board's layout + team comp in this browser, <strong>Delete</strong> removes the current board (you always keep at least one).</li>
+              <li><strong>Quick save / Quick load</strong> (toolbar): a faster checkpoint for just the board's hero layout and links — it never touches your team comp and never moves or resizes the view, unlike the sidebar's Save/board-switching.</li>
+              <li><strong>📷 Board image</strong> downloads the board diagram (with arrows showing who enhances whom) plus a simple row of your team comp's icons underneath. <strong>📷 Comp image</strong> downloads just the team comp, arranged in a ring so the arrows between your 6 heroes are easy to read. Neither is a raw screenshot — both are cleanly redrawn for sharing.</li>
               <li>Drag the small handle above <strong>Team comp</strong> up or down to resize how much of the workspace it takes.</li>
             </ul>
           </aside>
@@ -167,6 +167,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=24"></script>
+    <script src="./app.js?v=25"></script>
   </body>
 </html>
