@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Marvel Rivals S9 Team-Up Builder</title>
-    <link rel="stylesheet" href="./styles.css?v=27">
+    <link rel="stylesheet" href="./styles.css?v=29">
   </head>
   <body>
     <div class="app-shell">
@@ -113,6 +113,7 @@
               <li><strong>Quick save / Quick load</strong> (toolbar): a faster checkpoint for just the board's hero layout and links — it never touches your team comp and never moves or resizes the view, unlike the sidebar's Save/board-switching.</li>
               <li><strong>📷 Board image</strong> downloads the board diagram (with arrows showing who enhances whom) plus a simple row of your team comp's icons underneath. <strong>📷 Comp image</strong> downloads just the team comp, arranged in a ring so the arrows between your 6 heroes are easy to read. Neither is a raw screenshot — both are cleanly redrawn for sharing.</li>
               <li>Drag the small handle above <strong>Team comp</strong> up or down to resize how much of the workspace it takes.</li>
+              <li><strong>Credits</strong> (bottom-right footer) explains why this site exists and who made it.</li>
             </ul>
           </aside>
           <div class="zoom-controls">
@@ -150,6 +151,22 @@
             <p class="panel-hint">This button asks: what's the fewest loops — sharing heroes where needed — that together touch every hero who can ever be part of a loop at all? Here's the graph theory behind it.</p>
             <ul id="loopTheoryFactsList"></ul>
           </aside>
+          <aside id="creditsPanel" class="help-panel hidden" aria-label="Credits">
+            <div class="panel-head">
+              <span class="eyebrow">Credits</span>
+              <button id="closeCredits" class="panel-close" type="button" title="Close">×</button>
+            </div>
+            <div class="role-stripe" aria-hidden="true"></div>
+            <div class="credits-body">
+              <h4 class="credits-heading">Why this exists</h4>
+              <p>Season 9's Team-Up system is powerful, but genuinely chaotic to read — dozens of enablers and receivers scattered across the roster with no easy way to see who actually pairs with who. This site turns that mess into something you can look at: an interactive map of every Team-Up relationship, built to make the efficiency between enablers and receivers obvious at a glance, so you can find the comps that actually work — for your own games, or for proplay-level lineups.</p>
+              <h4 class="credits-heading">Free, out of love for the game</h4>
+              <p>No ads, no accounts, no tracking, no cost. Built purely because the game deserved a better tool than staring at a patch note — with <strong>Claude Code</strong> doing a lot of the heavy lifting alongside me.</p>
+              <h4 class="credits-heading">Made by</h4>
+              <p class="credits-author">Icepyramid</p>
+              <p class="credits-contact">Questions, bugs, ideas? <span class="discord-chip">Discord DM: icepyramid_</span></p>
+            </div>
+          </aside>
         </section>
 
         <section class="comp-tray" aria-label="Team comp builder">
@@ -165,11 +182,11 @@
 
         <footer class="statusbar">
           <span id="boardStats">0 heroes on board</span>
-          <span>Drag icons freely. Lines update live. <button id="easterEgg" class="easter-egg-btn" type="button" title="???">&#129371;</button></span>
+          <span>Drag icons freely. Lines update live. <button id="toggleCredits" class="credits-btn" type="button" title="Why this site exists, and who made it">Credits</button> <button id="easterEgg" class="easter-egg-btn" type="button" title="???">&#129371;</button></span>
         </footer>
       </main>
     </div>
 
-    <script src="./app.js?v=27"></script>
+    <script src="./app.js?v=28"></script>
   </body>
 </html>

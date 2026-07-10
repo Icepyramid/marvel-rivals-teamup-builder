@@ -2329,6 +2329,10 @@ EASTER_EGG_FACTS.forEach(fact => {
 document.querySelector("#easterEgg").addEventListener("click", () => easterEggPanel.classList.toggle("hidden"));
 document.querySelector("#closeEasterEgg").addEventListener("click", () => easterEggPanel.classList.add("hidden"));
 
+const creditsPanel = document.querySelector("#creditsPanel");
+document.querySelector("#toggleCredits").addEventListener("click", () => creditsPanel.classList.toggle("hidden"));
+document.querySelector("#closeCredits").addEventListener("click", () => creditsPanel.classList.add("hidden"));
+
 // "Full loop theory" gets the same graph-theory facts, but surfaced right
 // where a curious user is already looking (opened automatically alongside
 // the visualization) rather than tucked behind the footer egg button.

@@ -581,6 +581,79 @@ button:disabled {
   background: transparent;
 }
 
+.credits-btn {
+  border: 0;
+  background: transparent;
+  padding: 0 0 0 6px;
+  margin-left: 4px;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  vertical-align: middle;
+  opacity: 0.85;
+}
+
+.credits-btn:hover {
+  background: transparent;
+  opacity: 1;
+}
+
+/* A small nod to the site's role-color palette, purely decorative. */
+.role-stripe {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--vanguard), var(--duelist), var(--strategist), var(--flex));
+  margin: -4px 0 4px;
+}
+
+.credits-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.credits-heading {
+  margin: 10px 0 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.credits-heading:first-child {
+  margin-top: 0;
+}
+
+.credits-body p {
+  margin: 0;
+  color: var(--text);
+}
+
+.credits-body p.credits-author {
+  font-size: 17px;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--vanguard), var(--strategist));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.discord-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(88, 101, 242, 0.18);
+  border: 1px solid rgba(88, 101, 242, 0.55);
+  color: #b7bcff;
+  font-weight: 700;
+  font-size: 12px;
+}
+
 .panel-head {
   display: grid;
   grid-template-columns: 52px 1fr auto;
