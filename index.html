@@ -73,6 +73,7 @@
             <button id="quickLoad" type="button" title="Reload this board's last save, discarding unsaved changes">Quick load</button>
             <button id="exportBoardImage" type="button" title="Download a clean, shareable picture of the board">📷 Board image</button>
             <button id="exportCompImage" type="button" title="Download a clean, shareable picture of the team comp">📷 Comp image</button>
+            <button id="exportFullImage" type="button" title="Download one combined picture with both the board and the team comp">📷 Full card</button>
             <button id="toggleHelp" type="button" title="Show controls">? Controls</button>
           </div>
         </header>
@@ -108,7 +109,7 @@
               <li>The detail panel's <strong>Show all partners</strong> / <strong>Show all enhanced</strong> buttons toggle — click again to remove exactly the heroes/links they added (anything still needed by another open loop, route, or the other bulk button stays).</li>
               <li><strong>Route finder</strong> picks a start and end hero and offers the 3 shortest Team-Up routes between them — show one to highlight it on the board in its own color.</li>
               <li><strong>Boards</strong> (top of the sidebar): keep multiple separate boards side by side. <strong>+ New</strong> starts a fresh empty one, the dropdown switches between them (auto-saving the one you're leaving), <strong>Save</strong> stores the current board's layout + team comp in this browser, <strong>Delete</strong> removes the current board (you always keep at least one). <strong>Quick save / Quick load</strong> in the toolbar do the same save/reload for whichever board is active, without leaving the board view.</li>
-              <li><strong>📷 Board image / 📷 Comp image</strong> download a clean, separately-arranged picture of just the board or just the team comp (not a raw screenshot) — good for sharing outside the app.</li>
+              <li><strong>📷 Board image / 📷 Comp image / 📷 Full card</strong> download clean, arrow-and-legend-annotated pictures (not raw screenshots) — separately, or combined in one image — good for sharing outside the app. The team comp is drawn as a ring so you can see exactly who upgrades whom inside your 6-hero team.</li>
               <li>Drag the small handle above <strong>Team comp</strong> up or down to resize how much of the workspace it takes.</li>
             </ul>
           </aside>
@@ -166,6 +167,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=23"></script>
+    <script src="./app.js?v=24"></script>
   </body>
 </html>

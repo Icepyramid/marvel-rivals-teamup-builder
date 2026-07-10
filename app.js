@@ -2530,6 +2530,94 @@ function drawCardFooter(ctx, w, h) {
   ctx.fillText("Marvel Rivals S9 — Team-Up Builder", w / 2, h - 28);
 }
 
+// Trims a link segment so both ends stop at the edge of their hero circles
+// (radius `rStart`/`rEnd`) instead of the circle centers — otherwise the
+// circles (drawn on top, after links) hide the line and its arrowhead
+// entirely, which was the root of "how do I know who's buffing who?".
+function trimSegment(p1, p2, rStart, rEnd) {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const dist = Math.hypot(dx, dy) || 1;
+  const ux = dx / dist;
+  const uy = dy / dist;
+  return {
+    start: { x: p1.x + ux * rStart, y: p1.y + uy * rStart },
+    end: { x: p2.x - ux * (rEnd + 8), y: p2.y - uy * (rEnd + 8) }
+  };
+}
+
+function drawArrowheadShape(ctx, tip, angle, size, fillStyle) {
+  ctx.beginPath();
+  ctx.moveTo(tip.x, tip.y);
+  ctx.lineTo(tip.x - size * Math.cos(angle - 0.45), tip.y - size * Math.sin(angle - 0.45));
+  ctx.lineTo(tip.x - size * Math.cos(angle + 0.45), tip.y - size * Math.sin(angle + 0.45));
+  ctx.closePath();
+  ctx.fillStyle = fillStyle;
+  ctx.fill();
+}
+
+// A link drawn as a halo'd, arrow-headed line: the dark halo behind the
+// colored line/arrowhead keeps direction legible regardless of the link's
+// own color or how many other links cross nearby — this (plus trimming to
+// the circle edges) is what actually makes "who enhances whom" readable at
+// a glance, which plain thin lines did not.
+function drawArrowLink(ctx, p1, p2, color) {
+  const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+  const arrowSize = 15;
+
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "rgba(4, 7, 16, 0.65)";
+  ctx.lineWidth = 6.5;
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.stroke();
+  drawArrowheadShape(ctx, p2, angle, arrowSize + 5, "rgba(4, 7, 16, 0.65)");
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.stroke();
+  drawArrowheadShape(ctx, p2, angle, arrowSize, color);
+}
+
+// One compact visual key instead of a paragraph of explanation: the same
+// role colors already ringing every portrait, plus a single arrow glyph
+// spelling out what an arrow means. Drawn once per card.
+function drawLegend(ctx, x, y) {
+  let cx = x;
+  const cy = y;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  [["Vanguard", roleColors.Vanguard], ["Duelist", roleColors.Duelist], ["Strategist", roleColors.Strategist], ["Flex", roleColors.Flex]]
+    .forEach(([label, color]) => {
+      ctx.beginPath();
+      ctx.arc(cx + 7, cy, 7, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      cx += 20;
+      ctx.fillStyle = "#c9d7f1";
+      ctx.font = "600 14px Arial";
+      ctx.fillText(label, cx, cy);
+      cx += ctx.measureText(label).width + 26;
+    });
+  const lineLen = 34;
+  ctx.strokeStyle = "#3ddc71";
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + lineLen, cy);
+  ctx.stroke();
+  drawArrowheadShape(ctx, { x: cx + lineLen, y: cy }, 0, 9, "#3ddc71");
+  cx += lineLen + 14;
+  ctx.fillStyle = "#c9d7f1";
+  ctx.font = "600 14px Arial";
+  ctx.fillText("= enhances (A → B)", cx, cy);
+}
+
 function drawHeroCircle(ctx, img, hero, roleColor, cx, cy, r) {
   ctx.save();
   ctx.beginPath();
@@ -2578,6 +2666,7 @@ async function drawBoardContent(ctx, x, y, w, h) {
   const cx0 = x + w / 2;
   const cy0 = y + h / 2;
   const toScreen = (wx, wy) => ({ x: cx0 + (wx - midX) * scale, y: cy0 + (wy - midY) * scale });
+  const r = Math.max(18, Math.min(34, 30 * scale + 10));
 
   for (const [id, link] of state.links) {
     if (state.hiddenLinks.has(id)) continue;
@@ -2587,27 +2676,13 @@ async function drawBoardContent(ctx, x, y, w, h) {
     const p1 = toScreen(s.x, s.y);
     const p2 = toScreen(t.x, t.y);
     const color = link.preview ? "rgba(226, 232, 245, 0.35)" : (link.color || "#3ddc71");
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.stroke();
-    const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-    const ah = 9;
-    ctx.beginPath();
-    ctx.moveTo(p2.x, p2.y);
-    ctx.lineTo(p2.x - ah * Math.cos(angle - 0.4), p2.y - ah * Math.sin(angle - 0.4));
-    ctx.lineTo(p2.x - ah * Math.cos(angle + 0.4), p2.y - ah * Math.sin(angle + 0.4));
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
+    const seg = trimSegment(p1, p2, r, r);
+    drawArrowLink(ctx, seg.start, seg.end, color);
   }
 
   const portraits = new Map();
   await Promise.all(nodes.map(async n => portraits.set(n.hero, await loadLocalPortrait(n.hero))));
 
-  const r = Math.max(18, Math.min(34, 30 * scale + 10));
   for (const n of nodes) {
     const p = toScreen(n.x, n.y);
     drawHeroCircle(ctx, portraits.get(n.hero), n.hero, roleColors[roleOf(n.hero)], p.x, p.y, r);
@@ -2621,7 +2696,7 @@ async function drawBoardContent(ctx, x, y, w, h) {
 
 async function buildBoardImageCanvas() {
   const W = 1600;
-  const H = 1100;
+  const H = 1150;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -2633,7 +2708,8 @@ async function buildBoardImageCanvas() {
     "Team-Up Board",
     `${activeBoardName} · ${state.nodes.size} hero${state.nodes.size === 1 ? "" : "es"} · ${state.links.size} link${state.links.size === 1 ? "" : "s"}`
   );
-  await drawBoardContent(ctx, 48, 150, W - 96, H - 150 - 60);
+  drawLegend(ctx, 48, 152);
+  await drawBoardContent(ctx, 48, 182, W - 96, H - 182 - 60);
   drawCardFooter(ctx, W, H);
   return canvas;
 }
@@ -2648,53 +2724,122 @@ function compStatsLine() {
   return `${filled.length}/6 heroes · ${internal} internal team-up${internal === 1 ? "" : "s"}${rolesText ? " · " + rolesText : ""}`;
 }
 
-async function drawCompContent(ctx, x, y, w) {
+// Arranges the 6 comp slots in a ring (rather than a row) so the arrows
+// between related members — the whole point, since a raw row of portraits
+// said nothing about who upgrades whom — have room to read clearly without
+// every line crossing every other one.
+async function drawCompContent(ctx, x, y, w, h) {
   const slots = state.comp;
-  const r = Math.min(70, w / 14);
-  const gap = w / 6;
+  const cx0 = x + w / 2;
+  const cy0 = y + h / 2;
+  const r = Math.max(36, Math.min(64, Math.min(w, h) / 8));
+  const labelGap = 34;
+  const R = Math.max(80, Math.min(w, h) / 2 - r - labelGap - 30);
+
+  const positions = slots.map((hero, i) => {
+    const angle = -Math.PI / 2 + (i * Math.PI * 2) / 6;
+    return { hero, angle, x: cx0 + R * Math.cos(angle), y: cy0 + R * Math.sin(angle) };
+  });
+  const filled = positions.filter(p => p.hero);
+
+  // Internal team-ups: only the relationships that exist BETWEEN the 6
+  // comp members themselves (matches the "internal team-ups" stat already
+  // shown in the header line).
+  for (const a of filled) {
+    for (const b of filled) {
+      if (a === b) continue;
+      if ((relationships[a.hero] || []).includes(b.hero)) {
+        const seg = trimSegment(a, b, r, r);
+        drawArrowLink(ctx, seg.start, seg.end, "#3ddc71");
+      }
+    }
+  }
+
   const portraits = new Map();
-  await Promise.all(slots.filter(Boolean).map(async hero => portraits.set(hero, await loadLocalPortrait(hero))));
-  slots.forEach((hero, i) => {
-    const cx = x + gap * i + gap / 2;
-    const cy = y + r + 10;
-    if (hero) {
-      drawHeroCircle(ctx, portraits.get(hero), hero, roleColors[roleOf(hero)], cx, cy, r);
-      ctx.fillStyle = "#f5f7ff";
-      ctx.font = "700 18px Arial";
+  await Promise.all(filled.map(async p => portraits.set(p.hero, await loadLocalPortrait(p.hero))));
+
+  positions.forEach(p => {
+    const labelR = R + r + labelGap;
+    const labelX = cx0 + labelR * Math.cos(p.angle);
+    const labelY = cy0 + labelR * Math.sin(p.angle);
+    if (p.hero) {
+      drawHeroCircle(ctx, portraits.get(p.hero), p.hero, roleColors[roleOf(p.hero)], p.x, p.y, r);
       ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.fillText(hero, cx, cy + r + 18);
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#f5f7ff";
+      ctx.font = "700 17px Arial";
+      ctx.fillText(p.hero, labelX, labelY - 9);
       ctx.fillStyle = "#96a8c8";
       ctx.font = "400 13px Arial";
-      ctx.fillText(roleOf(hero), cx, cy + r + 42);
+      ctx.fillText(roleOf(p.hero), labelX, labelY + 11);
     } else {
       ctx.save();
       ctx.setLineDash([6, 6]);
       ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
       ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
       ctx.font = "400 14px Arial";
       ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.fillText("Empty", cx, cy + r + 18);
+      ctx.textBaseline = "middle";
+      ctx.fillText("Empty", labelX, labelY);
     }
   });
 }
 
 async function buildCompImageCanvas() {
-  const W = 1400;
-  const H = 620;
+  const W = 1100;
+  const H = 1080;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
   drawCardBackground(ctx, W, H);
   drawCardHeader(ctx, "MARVEL RIVALS S9", "Team Comp", `${activeBoardName} · ${compStatsLine()}`);
-  await drawCompContent(ctx, 48, 190, W - 96);
+  drawLegend(ctx, 48, 152);
+  await drawCompContent(ctx, 48, 182, W - 96, H - 182 - 60);
+  drawCardFooter(ctx, W, H);
+  return canvas;
+}
+
+async function buildFullCardCanvas() {
+  const W = 1600;
+  const headerH = 182;
+  const boardH = 980;
+  const sectionGap = 30;
+  const compH = 900;
+  const footerH = 60;
+  const H = headerH + boardH + sectionGap + compH + footerH;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  drawCardBackground(ctx, W, H);
+  drawCardHeader(
+    ctx,
+    "MARVEL RIVALS S9",
+    "Team-Up Builder",
+    `${activeBoardName} · ${state.nodes.size} hero${state.nodes.size === 1 ? "" : "es"} on board · ${compStatsLine()}`
+  );
+  drawLegend(ctx, 48, 152);
+
+  let y = headerH;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#ffdc49";
+  ctx.font = "700 16px Arial";
+  ctx.fillText("BOARD", 48, y + 18);
+  await drawBoardContent(ctx, 48, y + 34, W - 96, boardH - 34);
+  y += boardH + sectionGap;
+
+  ctx.fillStyle = "#ffdc49";
+  ctx.font = "700 16px Arial";
+  ctx.fillText("TEAM COMP", 48, y + 18);
+  await drawCompContent(ctx, 48, y + 34, W - 96, compH - 34);
+
   drawCardFooter(ctx, W, H);
   return canvas;
 }
@@ -2726,3 +2871,4 @@ async function exportImage(buildFn, filenamePrefix, triggerButton) {
 
 document.querySelector("#exportBoardImage").addEventListener("click", event => exportImage(buildBoardImageCanvas, "teamup-board", event.currentTarget));
 document.querySelector("#exportCompImage").addEventListener("click", event => exportImage(buildCompImageCanvas, "teamup-comp", event.currentTarget));
+document.querySelector("#exportFullImage").addEventListener("click", event => exportImage(buildFullCardCanvas, "teamup-full", event.currentTarget));
