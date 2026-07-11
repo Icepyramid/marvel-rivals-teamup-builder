@@ -827,6 +827,96 @@ button:disabled {
   background: var(--vanguard);
 }
 
+.panel-row-wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.panel-row-wrap .panel-row {
+  margin-bottom: 0;
+}
+
+.panel-info-btn {
+  width: 30px;
+  border-color: rgba(255, 216, 79, 0.5);
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 900;
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.panel-info-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #08101d;
+}
+
+.teamup-detail {
+  grid-column: 1 / -1;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 216, 79, 0.25);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.teamup-detail.hidden {
+  display: none;
+}
+
+.teamup-name {
+  margin-bottom: 4px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.teamup-slot {
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.teamup-line {
+  margin: 4px 0 0;
+}
+
+.teamup-tag {
+  display: inline-block;
+  margin-right: 2px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.teamup-tag.base {
+  background: rgba(76, 240, 181, 0.16);
+  color: var(--strategist);
+}
+
+.teamup-tag.enhanced {
+  background: rgba(81, 194, 255, 0.16);
+  color: var(--vanguard);
+}
+
+.panel-credit {
+  margin: 0;
+  padding-top: 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.panel-credit a {
+  color: var(--gold);
+}
+
 .node {
   position: absolute;
   width: var(--size);

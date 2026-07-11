@@ -82,6 +82,431 @@ const roles = {
   "Loki": "Strategist", "Hawkeye": "Duelist"
 };
 
+// Per-Team-Up descriptions, keyed by the receiving hero. `from` is the
+// providing partner. Text sourced from "Marvel Rivals Season 9.0 Team-Ups -
+// Super Simplified Guide" written and researched by Kane Carter
+// (u/-popgoes · @kanethecarter) — credited in the detail panel and the
+// Credits panel per the author's request. Do not remove the credit.
+const TEAMUP_GUIDE_URL = "https://docs.google.com/document/d/1sNXwLJ3VodDypfs46KtfcdIgoX_fyeCMpImZ3HJzmM4/";
+const teamupInfo = {
+  "Adam Warlock": [
+    { from: "Storm", name: "Cosmic Cyclone", slot: "upgrades Shift",
+      base: "Soul Bonded allies receive a Speed Boost (+20%). Soul Bond range is increased (5m).",
+      enhanced: "Speed Boost is increased (+30%). Bonded allies also receive a Damage Boost (+12%)." },
+    { from: "Ultron", name: "Flawless Design", slot: "upgrades Right-Click",
+      base: "Cosmic Cluster now heals allies (16h/shot). Successful healing also reduces Avatar Life Stream's cooldown (-0.6s). Ammo capacity is increased (+10).",
+      enhanced: "Cosmic Cluster now has splash damage and splash healing (3m radius, 5d/shot)." }
+  ],
+  "Angela": [
+    { from: "Star-Lord", name: "Asgardians of the Galaxy", slot: "C",
+      base: "Reveals enemies on activation (50m radius). Second activation performs slam (10m radius, 65d) that Grounds enemies. 25s cooldown.",
+      enhanced: "Slam now provides Bonus Health (75bh) per target hit, 200 max." },
+    { from: "Loki", name: "Odin's Unacknowledged", slot: "C",
+      base: "Send a charging illusion (250h) forward that carries enemies. 20s cooldown.",
+      enhanced: "Ability gains a second charge." }
+  ],
+  "Black Cat": [
+    { from: "Black Panther", name: "Feline Alliance", slot: "C",
+      base: "Absorb damage (50d) to release an explosion that damages (45d) and Knocks back enemies (8m radius). Gain a Speed Boost (+3m/s, decays over 3s) and Bonus Health (25bh). 12s cooldown.",
+      enhanced: "No required threshold of absorbed damage. Explosion can be triggered at any time." },
+    { from: "Spider-Man", name: "Binding Ties", slot: "upgrades E",
+      base: "Turn of Fortune now applies a Spider-Tracer. Attacking an enemy with a Spider-Tracer deals bonus damage (45d). Ability also gains a second charge.",
+      enhanced: "Turn of Fortune now Immobilizes (0.5s) enemies already marked with a Spider-Tracer." }
+  ],
+  "Black Panther": [
+    { from: "Storm", name: "Damisa-Yao", slot: "C",
+      base: "Deal damage (40d), apply Slow (-35% for 2s), and attach Vibranium Marks to enemies (8m radius). 12s cooldown.",
+      enhanced: "Slow effect is increased (-45%). Enemies within range are launched inwards." },
+    { from: "Magik", name: "Dimensional Shortcut", slot: "C",
+      base: "Teleport to your position from a few seconds ago, gaining Bonus Health (50bh), then deal an explosion (8m radius, 40d) that applies Vibranium Marks. 35s cooldown.",
+      enhanced: "Teleportation can now be cancelled manually." }
+  ],
+  "Black Widow": [
+    { from: "Hawkeye", name: "Allied Agents", slot: "Passive",
+      base: "Land hits with Red Room Rifle to build 1 Focus. Land crits to build 2 Focus. At 3 Focus, the next hit has Damage Boost (+45%) and can pierce.",
+      enhanced: "Landing crits stops Focus from expiring." },
+    { from: "Phoenix", name: "Burning Bullets", slot: "Passive",
+      base: "Red Room Rifle has increased Fire Rate (+15%). Electro-Plasma Blast is now a hitscan explosion (5m radius, 70d).",
+      enhanced: "Electro-Plasma Blast gains a second charge." }
+  ],
+  "Blade": [
+    { from: "Moon Knight", name: "Blade of Khonshu", slot: "C",
+      base: "Cleave forward with a short dash (9m in 0.15s). Then slash 4 times, sending Darkmoon Blades (40d) that bounce to nearby targets (150m/s). -35% damage falloff per bounce. 12s cooldown.",
+      enhanced: "Whirlwind Slash generates +1 Darkmoon Blade." },
+    { from: "Captain America", name: "Bleed for Battle", slot: "Passive",
+      base: "Gain a stack of Bloodline Awakening for every 40 damage taken.",
+      enhanced: "Taking critical damage (65% health) instantly activates Bloodline Awakening and adds 5 bonus stacks. The stack cap is increased to 12." }
+  ],
+  "Captain America": [
+    { from: "Winter Soldier", name: "Stars Aligned", slot: "C",
+      base: "Leap to an ally, providing Bonus Health (150bh) to both of you. Absorb some of the ally's incoming damage to yourself (2s). 12s cooldown.",
+      enhanced: "Leaping to an ally now provides a Speed Boost (+1.5m/s). Upon confirmation, leap to Winter Soldier to apply Bonus Health (150bh) to all nearby allies." },
+    { from: "Thor", name: "Voltaic Union", slot: "C",
+      base: "Activating will make Sentinel Strike pierce enemies. 15s cooldown.",
+      enhanced: "Each hit now deals splash damage (3m radius, 5d)." }
+  ],
+  "Cloak & Dagger": [
+    { from: "The Hood", name: "Oblivion Shroud", slot: "upgrades E",
+      base: "Veil of Lightforce now halts (4s) in place after a moment (or upon using ability again), decreasing enemy damage passing through it (-20%). Terror Cape now halts (4s) in place after a moment (or upon using ability again), decreasing enemy healing passing through it (-20%).",
+      enhanced: "Both veils increase in size (+33%) and allies receive Damage Boost (+15%) when passing through them." },
+    { from: "Luna Snow", name: "Frozen Haven", slot: "C",
+      base: "Freeze in place, becoming Invulnerable and healing yourself and nearby allies (8m radius, 50h/s). 20s cooldown.",
+      enhanced: "Healing is increased (90h/s)." }
+  ],
+  "Cyclops": [
+    { from: "Phoenix", name: "Slim and Red", slot: "upgrades E",
+      base: "Ricochet Force applies burn damage (14d/s) over time (3s). Hitting a burning target with Optic Blast or Concussive Beam instantly triggers 50% of the remaining damage.",
+      enhanced: "Spark detonations reduce Ricochet Force cooldown (0.5s)." },
+    { from: "Gambit", name: "Kinetic Kin", slot: "C",
+      base: "Activate to gain a Speed Boost (+40%) and increased jump height (+5m/s) for 6 seconds. 18s cooldown.",
+      enhanced: "Activating now increases attack speed for Optic Blast (+25%) and Concussive Beam (+10%)." }
+  ],
+  "Daredevil": [
+    { from: "Iron Fist", name: "Comprehensive Defense", slot: "upgrades Right-Click",
+      base: "Objection! now deflects projectiles from all directions and deals damage to nearby enemies.",
+      enhanced: "Objection! now also applies self-healing (60h/s)." },
+    { from: "Black Widow", name: "Devilish Affair", slot: "C",
+      base: "Deal damage (55d) in a cone (8.5m radius, 5m tall, 120 degrees) that inflicts Slow (-40% for 1.5s). 12s cooldown.",
+      enhanced: "Increase damage cone size (180 degrees) and now recover Fury on hit." }
+  ],
+  "Deadpool": [
+    { from: "Hela", name: "\"Hel-Yeah, Honey\"", slot: "Passive",
+      base: "Either Desert Eagles or Katanas can be upgraded once more. Upgraded Desert Eagles now pierce, and emojis now home in on enemies (and allies for Strategist Deadpool). Upgraded Katanas deal an explosion after hitting an enemy 3 times. Explosion deals (5d + 1.5% of target's max health) for Vanguard Deadpool, (5d + 2%) for Duelist Deadpool, (5d + 0.5%) for Strategist Deadpool.",
+      enhanced: "Both weapons can now be upgraded." },
+    { from: "Gambit", name: "Gumbo Chimichangas", slot: "C",
+      base: "Leap forward and deal damage to nearby enemies upon landing (5m radius): 60d for Vanguard Deadpool, 90d for Duelist Deadpool, 35d for Strategist Deadpool. 15s cooldown.",
+      enhanced: "Decrease the ability's cooldown (-5s). Landing now inflicts Stun (0.3s)." }
+  ],
+  "Devil Dinosaur": [
+    { from: "The Punisher", name: "Primal Punishment", slot: "C",
+      base: "Activate to replace Primal Bite with cannons that fire (0.25s per hit) for 8 seconds. Cannonballs deal direct damage (5d), splash damage (3m radius, 20d) and inflict Bleed. 12s cooldown.",
+      enhanced: "The Punisher can ride Devil Dinosaur for Damage Reduction (-25%). Devil Dinosaur also absorbs damage inflicted on The Punisher (50%)." },
+    { from: "Jeff the Land Shark", name: "Surf & Turf", slot: "upgrades Right-Click",
+      base: "Impact Beam now provides piercing healing for allies (40h/s) and has increased range (+18%) and duration (+21%).",
+      enhanced: "Jeff the Land Shark can ride Devil Dinosaur, providing both heroes with Damage Reduction (-12.5%) and healing (15h/s)." }
+  ],
+  "Doctor Strange": [
+    { from: "Hulk", name: "Gamma Maelstrom", slot: "upgrades E",
+      base: "Maelstrom of Madness's range is increased (+25%) and Dark Magic gained by hitting enemies is increased (+185%). Anti-Heal curse is also removed. Cooldown is increased (+2s).",
+      enhanced: "Using Maelstrom of Madness will now retain 50 energy. Energy also now does not decay over time." },
+    { from: "Invisible Woman", name: "Psionic Vortex", slot: "upgrades E",
+      base: "Maelstrom of Madness now launches enemies inwards. Shield of the Seraphim now has increased health (150h).",
+      enhanced: "Maelstrom of Madness now provides Bonus Health based on damage dealt (50%, 150bh maximum)." }
+  ],
+  "Elsa Bloodstone": [
+    { from: "Devil Dinosaur", name: "Prehistoric Trap", slot: "upgrades F",
+      base: "Smoky Snare has a larger detection range (5m radius) and will now also release a gas (3m radius) that deals damage (35d/s) over time (2s).",
+      enhanced: "Ability gains a second charge and 2 Smoky Snares can be active at once." },
+    { from: "Deadpool", name: "Loudmouth Mercs", slot: "upgrades Right-Click",
+      base: "Living Bullet now Slows targets (-25% for 2s), deals damage over time (20d/s) and Taunts targets. Bullet then auto-recalls, healing Elsa based on damage dealt and adding 1 stack to Inherited Instinct.",
+      enhanced: "The rate of acquiring Inherited Instinct is also increased (+33%)." }
+  ],
+  "Emma Frost": [
+    { from: "Mantis", name: "Spirit Breaker", slot: "upgrades E",
+      base: "Dealing damage to Psychic Spear's crystal now grants Bonus Health to you based on damage dealt (150%).",
+      enhanced: "Breaking Psychic Spear's crystal now also grants additional Bonus Health (100bh) and reduces the cooldown for Psychic Spear (-2s)." },
+    { from: "Luna Snow", name: "Iced Out Diamond", slot: "C",
+      base: "Deal damage (50d) in a cone (8m radius, 3m tall, 60 degrees) that inflicts Slow (-25% for 2s) and summons a wall of ice (350h). 12s cooldown.",
+      enhanced: "Attacks dealt in Diamond Form now apply Slow (-20% for 2s). Telepathic Pulse also applies Slow (scales to -10% at 100 energy)." }
+  ],
+  "Gambit": [
+    { from: "Magneto", name: "Favorable Odds", slot: "C",
+      base: "Summon a dome (5m radius for 5s) that heals allies (50h/s) and damages enemies (50d/s) in range, while also launching enemies back. 15s cooldown.",
+      enhanced: "The dome now explodes at the end of its duration, dealing additional damage (40d) and healing (60h)." },
+    { from: "Jubilee", name: "Sparkling Staff", slot: "C",
+      base: "Provide healing to nearby allies (8m radius, 70h/s) and damage to nearby enemies (5m radius, 45d/s) while blocking damage from projectiles (1.5s).",
+      enhanced: "Bayou Bash and Big Easy Impact now provide additional healing over time (10/s for 3s)." }
+  ],
+  "Groot": [
+    { from: "Mantis", name: "Wild Wall", slot: "C",
+      base: "Summon a wall (200h) that provides healing over time (20h/s) and Bonus Health over time (10bh/s) to nearby allies (15m radius). 10s cooldown.",
+      enhanced: "Wall now upgrades after providing 200 healing. Upgraded wall heals allies faster (35h/s) and has more health (250h)." },
+    { from: "Jeff the Land Shark", name: "Bubble Buddies", slot: "C",
+      base: "Activate to float in a shield (400h) that can float (4s) and provide healing (40h/s). 20s cooldown.",
+      enhanced: "Healing effect is doubled (80h/s) and excess healing becomes Bonus Health (50%). Jeff can also ride Groot, but he will not receive healing." }
+  ],
+  "Hawkeye": [
+    { from: "Psylocke", name: "Senbonzakura Strike", slot: "upgrades Left-Click",
+      base: "Blast Arrow becomes Psionic Arrow (32d), allowing up to 5 arrows to be nocked (0.09s each) and fired at once. Arrows do not deal splash damage.",
+      enhanced: "Arrow damage is decreased (24d), but nocking speed is increased (0.07) and arrows deal splash damage (2m radius, 8d)." },
+    { from: "Cloak & Dagger", name: "Moonlit Slash", slot: "upgrades Shift",
+      base: "Crescent Slash now fires a projectile that heals (65h) and boosts healing (+15% for 4s) for allies, and damages (65d) and applies Vulnerability (+15% for 4s) to enemies.",
+      enhanced: "Ability now has decreased healing (35h) and damage (35d) but fires 3 projectiles in quick succession." }
+  ],
+  "Hela": [
+    { from: "Venom", name: "Hel Tendrils", slot: "upgrades E",
+      base: "Soul Drainer now deals more damage (50d), pulls nearby enemies to its center (2s), and applies Slow (ranges from -20% to -40% based on distance from center).",
+      enhanced: "Piercing Night now fires more Nightsword Thorns (+2) which restore health (20h each)." },
+    { from: "Namor", name: "Deep Wrath", slot: "Passive",
+      base: "Participating in a KO spawns an Undead Monstro (150h) that expires (8s), autonomously dealing damage (15d). Piercing Night will command the Monstro(s) to attack the nearest enemy you hit.",
+      enhanced: "Attacks during Goddess of Night spawn additional Undead Monstros (up to 3)." }
+  ],
+  "Hulk": [
+    { from: "Captain America", name: "Savage Slam", slot: "C",
+      base: "Activate to jump and slam the ground, dealing damage to nearby enemies (8m radius, 40d) and reducing your ability cooldowns based on your current health: 1-3s (max at 400h) for Gamma Burst and Radioactive Lockdown, 2-5s (max at 400h) for Indestructible Guard. Can be activated mid-jump. 20s cooldown.",
+      enhanced: "Slam has increased damage (50d) and applies Vulnerability to enemies (+20% for 3s)." },
+    { from: "Wolverine", name: "Gamma Fastball", slot: "C",
+      base: "Activate to become Furious for a period (6s), gaining Speed Boost (+20%), and increased attack speed (+20%), plus Unstoppable (6s) when health is low (<300h). 15s cooldown. 60s cooldown for Unstoppable.",
+      enhanced: "Hulk can throw Wolverine, also activating the Furious state on its own separate cooldown." }
+  ],
+  "Human Torch": [
+    { from: "Jubilee", name: "Fiery Sparks", slot: "C",
+      base: "Send out projectiles (0.1/s) that deal damage (9d) autonomously to nearby enemies (10m radius) for a period of time (5s).",
+      enhanced: "Also gain Bonus Health (4bh) for each projectile that hits an enemy." },
+    { from: "Storm", name: "Storming Ignition", slot: "C",
+      base: "Summon a dome (5m radius) that deals damage (30d) and damage over time (25d/s), pulling enemies to its center.",
+      enhanced: "Flame Tornados can now ignite Storm's Omega Hurricane, increasing its radius (+2m) and each one increasing its duration (+3s, max 11s)." }
+  ],
+  "Invisible Woman": [
+    { from: "Human Torch", name: "United Siblings", slot: "upgrades Right-Click",
+      base: "Guardian Shield has increased health (300h) and now boosts damage from projectiles fired by allies that pass through it (+20%).",
+      enhanced: "Guardian Shield is larger and has further increased health (400h)." },
+    { from: "Mister Fantastic", name: "First Family", slot: "C",
+      base: "Enter Invisible state with nearby allies (4s), gaining healing (15h/s) and a Speed Boost (+1.2m/s). Invisible state ends briefly if damage is taken or dealt.",
+      enhanced: "Invisible lasts longer (6s), heals more (25h/s) and has a stronger Speed Boost (+1.8m/s)." }
+  ],
+  "Iron Fist": [
+    { from: "The Thing", name: "Iron & Stone", slot: "C",
+      base: "Activate to uppercut nearby enemies (5m radius, 45d), Launching Up enemies. 8s cooldown.",
+      enhanced: "Uppercut can be followed up with a second attack (5m radius, 45d)." },
+    { from: "White Fox", name: "Kumiho Palm", slot: "Passive",
+      base: "Yat Jee Chung Kuen now provides healing to nearby allies (6m radius, 6h per hit).",
+      enhanced: "Healing is increased (7.5 per hit) and Yat Jee Chung Kuen's lock-on distance is increased (+33%)." }
+  ],
+  "Iron Man": [
+    { from: "Hulk", name: "Gamma Charge", slot: "upgrades E",
+      base: "Armor Overdrive now provides a Gamma Shield (75h for 2s) and increases the damage of Repulsor Blast's direct hits (45d > 50d), its splash damage (60d > 65d), and Unibeam (180d/s > 200d/s) even further.",
+      enhanced: "Invincible Pulse Cannon now also provides a Gamma Shield (75h for 2s) and its projectile deals damage (45d) to nearby enemies as it flies." },
+    { from: "Thor", name: "Thunder Overdrive", slot: "Passive",
+      base: "The range of Unibeam is increased (2m). Unibeam also deals bonus damage (84d/s) to enemies caught near the beam's outer ring (0.75m radius). Armor Overdrive increases bonus damage (108d/s) and outer ring size (1/2m radius).",
+      enhanced: "Armor Overdrive's cooldown is reduced (-5s)." }
+  ],
+  "Jeff the Land Shark": [
+    { from: "Venom", name: "Guardian of the Deep", slot: "C",
+      base: "Shoot tendrils that link to nearby allies (15m radius), providing healing (45h) and healing over time (45h/s) until they expire (5s). Excess healing is converted to Bonus Health (50%). 20s cooldown.",
+      enhanced: "Tendrils now also link to nearby enemies, dealing damage over time (35d/s)." },
+    { from: "Deadpool", name: "Mr. Pool's Interdimensional Toy Box", slot: "",
+      base: "Summon a dome (6m radius) that heals allies over time (30h/s) and Taunts enemies for its duration (5s). 15s cooldown.",
+      enhanced: "The Taunt effect is increased, and damage is now dealt to enemies over time (30d/s)." }
+  ],
+  "Jubilee": [
+    { from: "The Hood", name: "Hellfire Sparks", slot: "Passive",
+      base: "When Attack Speed is increased (via Sparking Sprint or triggering a Sparkle Mark), Energy Plasmoids become hitscan (5d / 6.5h), grant self-healing on hit (2h), and can deal critical hits.",
+      enhanced: "Sparkle Marks are not cleared on hit, allowing Attack Speed increase to be re-triggered indefinitely." },
+    { from: "Blade", name: "Vampiric Kin", slot: "C",
+      base: "Activate a field around you (12m radius) that converts damage into healing (25%) for you and allies for its duration (6s). 15s cooldown.",
+      enhanced: "The field now also provides healing over time (25h/s)." }
+  ],
+  "Loki": [
+    { from: "Hela", name: "Villain's Illusion", slot: "C",
+      base: "Assume the form of a defeated hero (ally or enemy) for a period (6s) and use their abilities, except Ultimates. 30s cooldown.",
+      enhanced: "The period is extended (8s). Taking lethal damage while transformed (including via God of Mischief) will revert you back to Loki with some health (150h)." },
+    { from: "Mantis", name: "Vibrant Vitality", slot: "upgrades Shift",
+      base: "Regenerative Domain has an increased radius (6.5m) and provides a damage boost (+15%).",
+      enhanced: "Summoning Regenerative Domain now deals damage to enemies (45d) and Knocks them back." }
+  ],
+  "Luna Snow": [
+    { from: "White Fox", name: "Atlas Bond", slot: "C",
+      base: "Fire a projectile forward (3m radius, 35d) that Charms enemies (0.8m radius, 0.35s), heals allies (70h), and cleanses negative effects on you. 12s cooldown.",
+      enhanced: "The projectile now returns after reaching its max distance, repeating its effects. Cooldown is reduced (-2s)." },
+    { from: "Adam Warlock", name: "Duality Dance", slot: "C",
+      base: "Link to nearby (20m radius) allies and enemies for a period (6s). Damaging linked enemies (50%) and healing linked allies (25%) restores your health. Link breaks if heroes travel too far from you (25m radius). 15s cooldown.",
+      enhanced: "Critical hits with Light & Dark Ice now reduce the cooldowns of Absolute Zero (-0.5s) and Ice Arts (-1.5s)." }
+  ],
+  "Magik": [
+    { from: "Doctor Strange", name: "Chain of Cyttorak", slot: "C",
+      base: "Tether two enemies together, dealing damage over time (10d/s) pulling them to the center and applying Slow (ranges from 0% to -40% based on distance from center) until duration ends (4s). 20s cooldown.",
+      enhanced: "Tether can now connect an unlimited number of enemies together." },
+    { from: "The Hood", name: "Void Pentagram", slot: "C",
+      base: "Summon a field (8m radius). Using Stepping Discs in the field refunds some of its cooldown cost (-0.5s) and automatically summons a Limbo Demon. 15s cooldown.",
+      enhanced: "Limbo Demons summoned in the field have increased health (+100h) and attack range (+2.5m)." }
+  ],
+  "Magneto": [
+    { from: "Scarlet Witch", name: "Metallic Chaos", slot: "C",
+      base: "Activate to replace Iron Volley with large projectiles that are sent forward (120m/s), dealing direct damage (45d) and splash damage (40d) for its duration (8s). 12s cooldown.",
+      enhanced: "Mag-Cannon is replaced, allowing you to charge and fire up to 3 projectiles quickly (0.33s), dealing direct damage (20d) and splash damage (25d)." },
+    { from: "Emma Frost", name: "Magnetic Resonance", slot: "C",
+      base: "Cast a projection (300h) that mimics your movement and abilities (45% damage) until its duration ends (5s). 15s cooldown.",
+      enhanced: "The projection has increased health (450h) and no longer expires." }
+  ],
+  "Mantis": [
+    { from: "Star-Lord", name: "Star Blossom", slot: "upgrades Right-Click",
+      base: "Healing Flower has increased healing (15h+3%mh/s). Also, applying a Healing Flower on an ally who already has the effect will enhance its healing rate (17.5h+3.5%mh/s) even further, and heal nearby (8m radius) allies (7.5h+1.75%mh/s).",
+      enhanced: "Healing Flower now applies the enhanced healing rate and heals nearby allies on its first cast." },
+    { from: "Adam Warlock", name: "Vitality Pact", slot: "Passive",
+      base: "Self-healing from using Natural Anger is increased (+5h/s). Also, freely move as a soul upon defeat, healing allies in a radius (5h/s) and reviving at a chosen spot. 90s cooldown.",
+      enhanced: "You can now use Soul Bond (15m radius) with allies when freely moving as a soul, providing healing over time and sharing damage across allies (300h max)." }
+  ],
+  "Mister Fantastic": [
+    { from: "Rocket Raccoon", name: "Fantastic Amplifier", slot: "F",
+      base: "Elasticity's limit is increased to 200. Inflation State can be activated manually. 8s cooldown.",
+      enhanced: "Brainiac Bounce now Launches enemies inwards." },
+    { from: "The Thing", name: "Clobberin' Research Dept.", slot: "C",
+      base: "Activate to enter a brawling stance (10s). Stretch Punch becomes chargeable (over 1s), with damage that scales with charge (55d-100d) and providing Bonus Health that scales with damage (75%, max 75bh). Fully charged hits also Launch enemies back. 20s cooldown.",
+      enhanced: "Brawling stance now also makes Distended Grip chargeable (over 1s), slamming down an attack on a shorter cooldown (3s) with damage that scales with charge (70d-100d) and providing Bonus Health that scales with damage (75%, max 75bh)." }
+  ],
+  "Moon Knight": [
+    { from: "Cloak & Dagger", name: "Luminous Moon", slot: "C",
+      base: "Enter a phased state (0.25s) and dash forward (15m), then emit a pulse of healing around you (5m radius, 55h).",
+      enhanced: "Phased state lasts longer (0.35s), the dash travels further (17.5m), and the healing is greater (65h) in a larger space (8m radius)." },
+    { from: "Elsa Bloodstone", name: "Blood Moon", slot: "C",
+      base: "Deploy an Ankh Trap (100h) that summons a Talon of Khonshu that deals damage (70d) and launches enemies inwards when they enter its radius, then becomes an ordinary Ankh. Ankhs spawned from Ankh Traps are on a separate active limit, effectively allowing 4 active Ankhs on the field. Ankh Traps become invisible after a period (1s).",
+      enhanced: "Talon of Khonshu is replaced with 3 weaker Talons (40d) that fall in quick succession." }
+  ],
+  "Namor": [
+    { from: "Hulk", name: "Gamma Monstro", slot: "C",
+      base: "Summon an additional Monstro (150h) that autonomously attacks (50d/s) the nearest enemy, with damage increasing on single targets over time (+10%/s). Critical hits increase the Monstro's attack speed, and hitting with Wrath of the Seven Seas triggers it to fire a powerful beam (70d/s). 30s cooldown.",
+      enhanced: "Blessing of the Deep grants active Gamma Monstro a damage boost (+25%) and increases its cooldown recovery speed (+200%)." },
+    { from: "Luna Snow", name: "Chilling Charisma", slot: "C",
+      base: "Send a large projectile forward that damages (75d), pushes back, and inflicts Slow (-25% for 2s) on all enemies hit. 15s cooldown.",
+      enhanced: "Projectile applies damage (50d) and inflicts a stronger Slow (-40% for 2s) when it reaches max distance. Ability also gains a second charge." }
+  ],
+  "Peni Parker": [
+    { from: "Black Panther", name: "Vibranium Mech", slot: "C",
+      base: "Activate to increase the fire rate of Cyber-Web Cluster (+50%) and summon a frontal shield (300h) for its duration (6s). 20s cooldown.",
+      enhanced: "The frontal shield is now larger and has more health (400h)." },
+    { from: "Rocket Raccoon", name: "Rocket Network", slot: "C",
+      base: "Activate to summon an additional nest (250h) that drops Armor Packs (50bh each) every 3 seconds and spawns Spider-Drones. 25s cooldown.",
+      enhanced: "The additional nest will now regenerate its health (25h/s), and Rocket Raccoon's B.R.B. is now summoned with a Cyber-Web, generating Spider-Drones and Arachno-Mines." }
+  ],
+  "Phoenix": [
+    { from: "Hela", name: "Circle of Life", slot: "upgrades Right-Click",
+      base: "Telekinesis Burst is replaced with Phoenix Netherfire which quickly blasts the same location 3 times, each time applying 1 Spark. First blast inflicts damage (15d) and Stun. Second and third blasts inflict damage (20d) and Healing Reduction (-40% for 3s). Cooldown is increased (+2s).",
+      enhanced: "Each explosion now applies 2 Sparks." },
+    { from: "Rogue", name: "Telekinetic Beatdown", slot: "C",
+      base: "Fire a delayed hitscan shot forward, with infinite range, that sends the Phoenix Force to attack the target (40d), attacking additional targets (40d) if they are in range of the previous (8m radius, max 3 bounces). Each attack also applies 1 Spark and provides self-healing (50h). 12s cooldown.",
+      enhanced: "The shockwave's detection radius is increased, max bounces is increased (+1), self-healing is increased (65h), and attacks now apply 2 Sparks." }
+  ],
+  "Psylocke": [
+    { from: "Emma Frost", name: "Mental Projection", slot: "C",
+      base: "Project an illusion (5s) forward that uses Psi-Blade Dash, while you enter Stealth. The illusion mimics your movement and attacks (at your target) for a portion of damage (30%). 20s cooldown.",
+      enhanced: "Activate the ability again to swap places with the illusion." },
+    { from: "Cloak & Dagger", name: "Light & Dark Darts", slot: "C",
+      base: "Summon a field (6m radius) that activates your Stealth, and send out darts around you that deal damage (30d) and heal you upon impact (20h) until duration ends (5s).",
+      enhanced: "The field's size is increased (8m radius) and re-entering it will send darts out again." }
+  ],
+  "Rocket Raccoon": [
+    { from: "Squirrel Girl", name: "Mammalian Bond", slot: "C",
+      base: "Throw acorns (5) that can be consumed by allies, providing healing (20h) and reducing all cooldowns (-0.5s). 2 charges. 20s cooldown.",
+      enhanced: "Ability gains a third charge." },
+    { from: "Groot", name: "Planet X Pals", slot: "C",
+      base: "Bombard Mode is replaced for a period (8s), launching projectiles (0.2s) that deal damage (18d) and damage over time (5d/s) within the splash (5m radius), while providing healing (15h) and Bonus Health (20bh) to allies. 12s cooldown.",
+      enhanced: "The ability's duration is increased (+4s). You can also ride on Groot's shoulder." }
+  ],
+  "Rogue": [
+    { from: "Gambit", name: "Mr. & Mrs. X", slot: "C",
+      base: "Activating makes every attack trigger an explosion (8m radius) that deals damage (5d+1%mh) and healing (15h) for a period (8s). 30s cooldown.",
+      enhanced: "The effect no longer ends." },
+    { from: "Magneto", name: "Explosive Entanglement", slot: "Passive",
+      base: "Defensive Stance's damage reduction is increased (75%) and now 100% of incoming damage is converted for Southern Brawl.",
+      enhanced: "Southern Brawl now Knocks enemies back, and if they hit a wall it deals extra damage (60d)." }
+  ],
+  "Scarlet Witch": [
+    { from: "Doctor Strange", name: "Sorcerers Supreme", slot: "upgrades Right-Click",
+      base: "Chthonian Burst is replaced with rapid-fire (0.12s) projectiles that deal damage (?d). This uses an energy pool (300) that recharges when using Chaos Control (15/s). Holding fire drains energy (50/s).",
+      enhanced: "The energy pool is increased (450) and recharging with Chaos Control is faster (22.5/s). Holding fire also drains energy faster (56.5/s)." },
+    { from: "Jubilee", name: "Hex Fireworks", slot: "upgrades E",
+      base: "Dark Seal can now be activated again to detonate an explosion (6m radius) that deals damage (52d) and applies Vulnerability (+15% for 2s).",
+      enhanced: "Mystic Projection now provides self-healing (42h/s)." }
+  ],
+  "Spider-Man": [
+    { from: "Venom", name: "Symbiote Bond", slot: "C",
+      base: "Activate to receive damage reduction (-90%) and send spikes out that deal damage (30d) and damage over time (10d/s) to nearby enemies (5m radius). 15s cooldown.",
+      enhanced: "Damage over time is increased (+10d/s) and hit enemies are also inflicted with Slow (-50%)." },
+    { from: "Peni Parker", name: "Parker Power-Up", slot: "C",
+      base: "Activate to receive Bonus Health (50bh) and prime a bomb that can be thrown to deal damage (50d) and apply Spider-Tracers to hit enemies after it explodes (2s). Or hold onto the bomb to recharge all Web-Cluster shots when it explodes.",
+      enhanced: "Hitting enemies who have Spider-Tracers now provides Bonus Health (40bh)." }
+  ],
+  "Squirrel Girl": [
+    { from: "Iron Man", name: "Squirrel Missile", slot: "C",
+      base: "Fire a homing missile that deals an explosion (8m radius, 80d). 15s cooldown.",
+      enhanced: "Using Squirrel Blockade now also fires a homing missile." },
+    { from: "Spider-Man", name: "ESU Alumnus", slot: "C",
+      base: "Fire a bomb that explodes on impact, dealing damage (65d) and applying Slow (-35% for 3s) to enemies in range (4m radius). 20s cooldown.",
+      enhanced: "The bomb now creates a field (4m radius) for a period (3s) that applies damage over time (25d/s) and completely stuns enemies who are in it for too long (2s)." }
+  ],
+  "Star-Lord": [
+    { from: "Groot", name: "Flora Munitions", slot: "C",
+      base: "Throw a projectile that spawns snares (5) after a moment (1s) and last for a period (4s) that each deal damage (30d) and Stun enemies (0.8s). 15s cooldown.",
+      enhanced: "The amount of snares that are spawned is increased (8) and they each deal more damage (45d)." },
+    { from: "Adam Warlock", name: "Star-Soul", slot: "C",
+      base: "Place a beacon that you can teleport to at any point by activating the ability again. 30s cooldown. Also, respawn at the beacon automatically upon death. 120s cooldown.",
+      enhanced: "Participating in a KO now reduces the ability's cooldown (-10s)." }
+  ],
+  "Storm": [
+    { from: "Thor", name: "God of Thunder", slot: "upgrades Left-Click",
+      base: "Wind Blade deals less direct damage (45d) but is now hitscan with splash damage (3m radius, 15d) and the ability to critical hit.",
+      enhanced: "Bolt Rush has a faster cooldown (-2s), greater range (+20m) and can now bounce to nearby enemies (8m radius) for additional direct damage (50d)." },
+    { from: "Jeff the Land Shark", name: "Jaws of Fate", slot: "C",
+      base: "Activate a field (15m radius) that provides healing over time to self (35h/s) and allies (25h/s) for a period (8s). 15s cooldown.",
+      enhanced: "Jeff the Land Shark can enter Omega Hurricane to increase its range (+2m radius) and duration (+2s), as well as provide healing for self (15h/s) and allies (10h/s). Enemies caught in the hurricane for enough time (2.5s) are also swallowed until the ability ends." }
+  ],
+  "The Punisher": [
+    { from: "Daredevil", name: "Bestial Hunt", slot: "Passive",
+      base: "Adjudication and Deliverance receive a damage boost (+5.2%) and their bullets now penetrate targets.",
+      enhanced: "Adjudication and Deliverance now deal more damage to shields (+40%)." },
+    { from: "Rocket Raccoon", name: "Ammo Overload", slot: "C",
+      base: "Summon a field (5m radius) that provides a faster fire rate for Adjudication (+35%) and Deliverance (+40%). 25s cooldown.",
+      enhanced: "The field now grants infinite ammo for Adjudication and Deliverance." }
+  ],
+  "The Thing": [
+    { from: "Human Torch", name: "Two In One", slot: "C",
+      base: "Activate an enhanced state (10s) where Rocky Jab now deals splash damage (6m radius) and Stone Haymaker deals long-range damage (9.5m) in a cone. 15s cooldown.",
+      enhanced: "The Thing can be picked up by Human Torch and carried at high speed (12m/s). Being dropped deals splash damage (45d) and applies Stun (1s) to nearby enemies (8m radius), and automatically activates The Thing's enhanced state. 30s cooldown." },
+    { from: "Invisible Woman", name: "Unbreakable Forces", slot: "C",
+      base: "Activate to gain Bonus Health (75bh/s, max 150h) for a period (5s). Being at low health (<50%) increases the rate of Bonus Health accumulation (150h/s). A portion of damage from incoming hits returns to you as Bonus Health (15bh). 20s cooldown.",
+      enhanced: "When ability is active, taking enough damage (150d) sends a pulse (8m radius) of healing (80h) for allies. A higher portion of damage from incoming hits returns to you as Bonus Health (20bh)." }
+  ],
+  "Thor": [
+    { from: "Hela", name: "Ragnarok Rebirth", slot: "Passive",
+      base: "Temporarily revive with damage reduction (-40%), a decaying pool of Bonus Health (600bh), and total Anti-Heal upon death, fully resurrecting with some health (300h) upon participation of a KO. 50s cooldown. 30s cooldown on failed resurrection.",
+      enhanced: "Resurrection now happens if Hela participates in a KO. Resurrection also now comes with some healing over time (50h/s for 3s)." },
+    { from: "Angela", name: "Divine Armory", slot: "C",
+      base: "Throw a spear that deals splash damage (5m radius, 30d) and restores Thorforce when hitting an enemy. Activate again to leap to the spear, dealing another instance of splash damage (5m radius, 45d). 20s cooldown.",
+      enhanced: "Leaping to the spear now grants Bonus Health (100bh)." }
+  ],
+  "Ultron": [
+    { from: "Iron Man", name: "Stark Protocol", slot: "C",
+      base: "Upgrade Encephalo-Ray to deal piercing damage (70d/s) and healing (70h/s), without needing to reload, until the period ends (8s).",
+      enhanced: "Imperative: Firewall now also fires homing missiles (4) at enemies in range, each dealing splash damage (1.5m radius, 10d)." },
+    { from: "Peni Parker", name: "SP//dr Sync", slot: "C",
+      base: "Activate to apply Imperative: Patch drones to all allies on the map briefly (3s).",
+      enhanced: "Imperative: Firewall is now applied to all active Imperative: Patch drones." }
+  ],
+  "Venom": [
+    { from: "Blade", name: "Blood Leech", slot: "upgrades Right-Click",
+      base: "Cellular Corrosion now also deals damage over time (20d/s) with all of this damage returning to you as health. A portion of Cellular Corrosion's explosion damage (50%) also heals you.",
+      enhanced: "Using other abilities also grants one-time healing (40h)." },
+    { from: "Phoenix", name: "Abyssal Flames", slot: "C",
+      base: "Activate to replace Dark Predation with a sweeping frontal melee attack (10m range, 55d) for a period (8s). 12s cooldown.",
+      enhanced: "Attacking during activation now applies Sparks on enemies which detonate (3m radius, 20d) upon reaching 3 stacks." }
+  ],
+  "White Fox": [
+    { from: "Black Cat", name: "Lucky Loan", slot: "C",
+      base: "Activating recovers 1 Spirit Tail and summons an aura that heals (15h/s) and Speed Boost (+20% for 2s) for allies and deals damage over time (10d/s) and Slow (-20% for 2s) to enemies for its duration (5s). 25s cooldown.",
+      enhanced: "During activation, Spirit Tails aren't consumed by uses of Spectral Surge and Fox Form. Duration is also increased (6s)." },
+    { from: "Psylocke", name: "Psionic Fox", slot: "Passive",
+      base: "Fox Form Awakening is always at its maximum duration (10s) and becomes a traditional cooldown (15s) that no longer requires Spirit Tails.",
+      enhanced: "The cooldown for Fox Form Awakening is reduced (12s)." }
+  ],
+  "Winter Soldier": [
+    { from: "The Punisher", name: "Timeless Veterans", slot: "C",
+      base: "Fire electricity forward (15.25m) that deals damage (85d) and Knocks enemies back. 12s cooldown.",
+      enhanced: "The attack Knocks enemies back further and now Grounds them." },
+    { from: "Elsa Bloodstone", name: "Expert Instinct", slot: "Passive",
+      base: "Dealing enough damage (500d), or participating in a KO, will grant 1 stack of Culling Instinct (max 2). Each stack reduces the cooldowns of other abilities (-1.5s). 1 stack is lost on death.",
+      enhanced: "Bonus health granted by uses of Ceaseless Charge is also increased (70bh)." }
+  ],
+  "Wolverine": [
+    { from: "Cyclops", name: "Blast Slash", slot: "C",
+      base: "Activate to increase range (+1m) of Savage Claw and Berserk Claw Strike for a period (8s). Vicious Rampage now deals a lunge that releases melee damage (5d+0.01%mh per Rage) in all directions for a period (1s). 20s cooldown.",
+      enhanced: "Blast Slash is always active." },
+    { from: "Gambit", name: "Pair of Threes", slot: "C",
+      base: "Activate to gain a Speed Boost (+35%) and bonus jump height for a period (5s). Attacking enemies during the period also deals an additional instance of damage (15%) after a moment (0.5s). 12s cooldown.",
+      enhanced: "Also receive healing over time (25h/s) during the ability." }
+  ]
+};
+
 const portraits = {
   "Jubilee": "https://r.res.easebar.com/pic/20260708/48ff52bf-6f30-4350-b883-00f2652015dd.png",
   "Cyclops": "https://r.res.easebar.com/pic/20260612/8cf04b13-2e3c-49bc-8f90-000732c94f43.png",
@@ -1375,7 +1800,39 @@ function panelRow(hero, type) {
     }
     addPartnerLink(hero, type);
   });
-  return row;
+
+  // Team-Up ability details: for an incoming row the selected hero receives
+  // from `hero`; for an outgoing row `hero` receives from the selected hero.
+  const receiver = type === "incoming" ? state.selected : hero;
+  const provider = type === "incoming" ? hero : state.selected;
+  const info = (teamupInfo[receiver] || []).find(t => t.from === provider);
+  if (!info) return row;
+
+  const wrap = document.createElement("div");
+  wrap.className = "panel-row-wrap";
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "panel-info-btn";
+  toggle.textContent = "i";
+  toggle.title = `${info.name} — show Base / Enhanced details`;
+
+  const slotText = info.slot === "C" || info.slot === "F"
+    ? `new ability (${info.slot})`
+    : info.slot;
+  const detail = document.createElement("div");
+  detail.className = "teamup-detail hidden";
+  detail.innerHTML = `
+    <div class="teamup-name">${info.name}${slotText ? ` <span class="teamup-slot">${slotText}</span>` : ""}</div>
+    <p class="teamup-line"><span class="teamup-tag base" title="No Team-Up partner required on the team — just select the ability in the hero menu">Base</span> ${info.base}</p>
+    <p class="teamup-line"><span class="teamup-tag enhanced" title="Requires ${provider} on your team, plus the ability selected">Enhanced</span> ${info.enhanced}</p>
+  `;
+  toggle.addEventListener("click", () => {
+    const nowHidden = detail.classList.toggle("hidden");
+    toggle.classList.toggle("active", !nowHidden);
+  });
+
+  wrap.append(row, toggle, detail);
+  return wrap;
 }
 
 function panelSection(title, hint, list, type) {
@@ -1474,6 +1931,13 @@ function renderPanel(hero) {
 
   detailPanel.append(panelSection("Team-Up Partners", `Who enhances ${hero}`, incoming[hero] || [], "incoming"));
   detailPanel.append(panelSection("Enhances", `Heroes ${hero} enhances`, relationships[hero] || [], "outgoing"));
+
+  // Required credit for the Team-Up descriptions behind each row's ⓘ —
+  // requested by the guide's author, keep it visible wherever they render.
+  const credit = document.createElement("p");
+  credit.className = "panel-credit";
+  credit.innerHTML = `Team-Up details from <a href="${TEAMUP_GUIDE_URL}" target="_blank" rel="noopener">Kane Carter's S9 Team-Ups guide</a> (u/-popgoes&nbsp;·&nbsp;@kanethecarter).`;
+  detailPanel.append(credit);
 }
 
 // Adding a hero to the comp brings it onto the board too, connected only to
