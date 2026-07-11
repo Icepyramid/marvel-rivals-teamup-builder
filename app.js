@@ -2827,6 +2827,10 @@ boardWrap.addEventListener("drop", event => {
 });
 
 boardWrap.addEventListener("wheel", event => {
+  // detailPanel overlaps boardWrap on the right side — let wheel events
+  // that land on it scroll the panel's own content instead of zooming
+  // the board underneath.
+  if (event.target.closest("#detailPanel")) return;
   event.preventDefault();
   const rect = boardRect();
   const factor = event.deltaY < 0 ? 1.15 : 1 / 1.15;
