@@ -20,6 +20,7 @@
           <div class="boards-bar">
             <select id="boardSelect" aria-label="Choose board"></select>
             <button id="newBoard" type="button" title="Create a new empty board">+ New</button>
+            <button id="renameBoard" type="button" title="Rename this board">Rename</button>
             <button id="saveBoardBtn" type="button" title="Save this board's layout and team comp">Save</button>
             <button id="deleteBoard" type="button" title="Delete this board">Delete</button>
           </div>
@@ -92,8 +93,8 @@
               <button id="closeHelp" class="panel-close" type="button" title="Hide controls">×</button>
             </div>
             <ul>
-              <li><strong>Click</strong> a hero (sidebar, board, panel, or comp) to select it.</li>
-              <li><strong>Drag</strong> any hero icon from anywhere and drop it exactly on the board to place it there.</li>
+              <li><strong>Click</strong> a hero (sidebar, board, panel, or comp) to select it and see its info on the right — clicking a sidebar hero never places it on the board by itself.</li>
+              <li><strong>Drag</strong> any hero icon from anywhere (including the sidebar list) and drop it exactly on the board to place it there — dragging is the only way a sidebar hero joins the board.</li>
               <li><strong>Drag</strong> a board icon to move it; drag it onto a comp slot to add it to your team.</li>
               <li><strong>Right-click</strong> a board icon to remove it (and anything left link-less).</li>
               <li><strong>Left-click</strong> a link to recolor it (first swatch resets to green); <strong>right-click</strong> a link to hide it, right-click the same spot again to bring it back; <strong>Reset colors</strong> reverts every link to green at once.</li>
@@ -109,7 +110,7 @@
               <li><strong>Hold right-click and drag</strong> over empty board space to draw a selection box — every icon inside it gets selected (shown with a blue ring), along with the links between them. Left-click-drag any one of them to move the whole group together; right-click any one of them to remove the whole group at once. A plain right-click (no drag) on empty space clears the selection.</li>
               <li>The detail panel's <strong>Show all partners</strong> / <strong>Show all enhanced</strong> buttons toggle — click again to remove exactly the heroes/links they added (anything still needed by another open loop, route, or the other bulk button stays).</li>
               <li><strong>Route finder</strong> picks a start and end hero and offers the 3 shortest Team-Up routes between them — show one to highlight it on the board in its own color.</li>
-              <li><strong>Boards</strong> (top of the sidebar): keep multiple separate boards side by side, each with its own layout + team comp. <strong>+ New</strong> starts a fresh empty one, the dropdown switches between them (auto-saving the one you're leaving), <strong>Save</strong> stores the current board's layout + team comp in this browser, <strong>Delete</strong> removes the current board (you always keep at least one).</li>
+              <li><strong>Boards</strong> (top of the sidebar): keep multiple separate boards side by side, each with its own layout + team comp. <strong>+ New</strong> starts a fresh empty one, the dropdown switches between them (auto-saving the one you're leaving), <strong>Rename</strong> renames it, <strong>Save</strong> stores exactly what's on the board right now — even a Comp-only view, a Full loop theory layout, or a highlighted route — <strong>Delete</strong> removes the current board (you always keep at least one).</li>
               <li><strong>Quick save / Quick load</strong> (toolbar): a faster checkpoint for just the board's hero layout and links — it never touches your team comp and never moves or resizes the view, unlike the sidebar's Save/board-switching.</li>
               <li><strong>📷 Board image</strong> downloads the board diagram (with arrows showing who enhances whom) plus a simple row of your team comp's icons underneath. <strong>📷 Comp image</strong> downloads just the team comp, arranged in a ring so the arrows between your 6 heroes are easy to read. Neither is a raw screenshot — both are cleanly redrawn for sharing.</li>
               <li>Drag the small handle above <strong>Team comp</strong> up or down to resize how much of the workspace it takes.</li>
@@ -189,6 +190,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=29"></script>
+    <script src="./app.js?v=30"></script>
   </body>
 </html>

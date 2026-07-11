@@ -65,7 +65,7 @@ const roles = {
   "Hela": "Duelist", "Gambit": "Strategist", "Rocket Raccoon": "Strategist",
   "Thor": "Vanguard", "Jeff the Land Shark": "Strategist", "Mantis": "Strategist",
   "Hulk": "Vanguard", "Adam Warlock": "Strategist", "Cloak & Dagger": "Strategist",
-  "Venom": "Vanguard", "The Hood": "Vanguard", "Luna Snow": "Strategist",
+  "Venom": "Vanguard", "The Hood": "Duelist", "Luna Snow": "Strategist",
   "Storm": "Duelist", "Phoenix": "Duelist", "Jubilee": "Strategist",
   "Captain America": "Vanguard", "Invisible Woman": "Strategist", "Star-Lord": "Duelist",
   "Psylocke": "Duelist", "Groot": "Vanguard", "The Punisher": "Duelist",
@@ -904,9 +904,13 @@ function renderHeroList(filter = "") {
           fillSlot(pickingSlot, hero);
           return;
         }
-        // This list only ever shows heroes not yet on the board — link only
-        // to whatever's already there, never auto-expand others.
-        addConnected(hero);
+        // Left-click only opens this hero's info in the detail panel on the
+        // right — it never places anything on the board. Dragging the icon
+        // (see dragstart above) is the only way to add a sidebar hero to
+        // the board.
+        clearMultiSelection();
+        selectHero(hero);
+        renderLinks();
       });
       heroList.append(button);
     });
@@ -2705,17 +2709,22 @@ function createNewBoard() {
   renderBoardSelect();
 }
 
+// Deliberately does NOT call revertTransientViews() — Save captures
+// whatever is literally on the board right now, including a Comp-only
+// view, a Full loop theory layout, or a highlighted route. Only automatic/
+// implicit transitions (switching boards, creating, deleting) revert an
+// open overlay first, to avoid silently corrupting a DIFFERENT board's
+// data — an explicit Save is the user asking to keep exactly what they see.
 function saveCurrentBoard(triggerButton) {
-  revertTransientViews();
   persistActiveBoard();
   flashButton(triggerButton, "Saved!");
 }
 
 // Toolbar Quick save/Quick load: board layout + links ONLY. Never touches
 // the team comp, and never moves/resets the view — a plain reload of the
-// current pan/zoom with the saved layout dropped back in.
+// current pan/zoom with the saved layout dropped back in. Quick save also
+// captures whatever is currently on the board as-is (see saveCurrentBoard).
 function quickSaveBoard(triggerButton) {
-  revertTransientViews();
   localStorage.setItem(quickSaveKey(activeBoardName), snapshotBoardOnly());
   flashButton(triggerButton, "Saved!");
 }
@@ -2731,6 +2740,30 @@ function quickLoadBoard(triggerButton) {
   restoreBoardOnly(saved);
   commit();
   flashButton(triggerButton, "Loaded!");
+}
+
+// Renames the active board: moves its saved data (and quick-save, if any)
+// to new localStorage keys and updates the boards index — doesn't touch
+// the board's actual content at all.
+function renameCurrentBoard() {
+  const newName = (window.prompt("New name for this board:", activeBoardName) || "").trim();
+  if (!newName || newName === activeBoardName) return;
+  if (boardsIndex.includes(newName)) {
+    window.alert(`A board named "${newName}" already exists.`);
+    return;
+  }
+  const oldName = activeBoardName;
+  const oldData = localStorage.getItem(boardDataKey(oldName));
+  const oldQuickSave = localStorage.getItem(quickSaveKey(oldName));
+  if (oldData !== null) localStorage.setItem(boardDataKey(newName), oldData);
+  if (oldQuickSave !== null) localStorage.setItem(quickSaveKey(newName), oldQuickSave);
+  localStorage.removeItem(boardDataKey(oldName));
+  localStorage.removeItem(quickSaveKey(oldName));
+  boardsIndex = boardsIndex.map(name => (name === oldName ? newName : name));
+  localStorage.setItem(BOARDS_INDEX_KEY, JSON.stringify(boardsIndex));
+  activeBoardName = newName;
+  localStorage.setItem(ACTIVE_BOARD_KEY, activeBoardName);
+  renderBoardSelect();
 }
 
 function deleteCurrentBoard() {
@@ -2755,6 +2788,7 @@ loadNamedBoard(activeBoardName);
 
 document.querySelector("#boardSelect").addEventListener("change", event => switchBoard(event.target.value));
 document.querySelector("#newBoard").addEventListener("click", createNewBoard);
+document.querySelector("#renameBoard").addEventListener("click", renameCurrentBoard);
 document.querySelector("#saveBoardBtn").addEventListener("click", event => saveCurrentBoard(event.currentTarget));
 document.querySelector("#deleteBoard").addEventListener("click", deleteCurrentBoard);
 
