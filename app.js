@@ -1936,7 +1936,7 @@ function renderPanel(hero) {
   // requested by the guide's author, keep it visible wherever they render.
   const credit = document.createElement("p");
   credit.className = "panel-credit";
-  credit.innerHTML = `Team-Up details from <a href="${TEAMUP_GUIDE_URL}" target="_blank" rel="noopener">Kane Carter's S9 Team-Ups guide</a> (u/-popgoes&nbsp;·&nbsp;@kanethecarter).`;
+  credit.innerHTML = `Team-Up details from <a href="${TEAMUP_GUIDE_URL}" target="_blank" rel="noopener">Kane Carter's S9 Team-Ups guide</a> (u/-popgoes&nbsp;·&nbsp;@kanethecarter). Info, stats, and images taken from Marvel Rivals and the <a href="https://www.marvelrivals.com/heroes" target="_blank" rel="noopener">Marvel Rivals website</a>.`;
   detailPanel.append(credit);
 }
 
