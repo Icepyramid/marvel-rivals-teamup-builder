@@ -2633,6 +2633,33 @@ function clearWorkingBoard() {
   renderRoutePanel();
 }
 
+// Comp-only view and Full loop theory are temporary overlays: they stash
+// the real board in a snapshot variable, replace the working board with a
+// stripped/rearranged view, and restore that snapshot when toggled back
+// off. If a board-switching action runs while one is still open, it has
+// no idea that stashed snapshot exists — `persistActiveBoard()` would save
+// the STRIPPED view as the board's real data (erasing the actual layout),
+// and the snapshot (pointing at whatever board was active when the overlay
+// opened) would later get restored into a DIFFERENT board via the
+// overlay's own toggle-off, once that board also happens to have the
+// overlay open — the "comps leak between boards" bug. Every board-level
+// action below reverts any open overlay back to the real board FIRST.
+function revertTransientViews() {
+  if (compOnlyViewOn) {
+    restoreState(compOnlyViewSnapshot);
+    compOnlyViewOn = false;
+    compOnlyViewSnapshot = null;
+    updateCompOnlyViewButton();
+  }
+  if (fullLoopTheoryOn) {
+    restoreState(fullLoopTheorySnapshot);
+    fullLoopTheoryOn = false;
+    fullLoopTheorySnapshot = null;
+    updateFullLoopButton();
+    loopTheoryPanel.classList.add("hidden");
+  }
+}
+
 // Two different boards' undo timelines shouldn't mix — switching starts a
 // fresh history with just the board's just-loaded state in it.
 function resetHistoryAfterBoardSwitch() {
@@ -2651,6 +2678,7 @@ function loadNamedBoard(name) {
 
 function switchBoard(name) {
   if (name === activeBoardName) return;
+  revertTransientViews();
   persistActiveBoard();
   activeBoardName = name;
   localStorage.setItem(ACTIVE_BOARD_KEY, activeBoardName);
@@ -2665,6 +2693,7 @@ function createNewBoard() {
     window.alert(`A board named "${name}" already exists.`);
     return;
   }
+  revertTransientViews();
   persistActiveBoard();
   boardsIndex.push(name);
   localStorage.setItem(BOARDS_INDEX_KEY, JSON.stringify(boardsIndex));
@@ -2677,6 +2706,7 @@ function createNewBoard() {
 }
 
 function saveCurrentBoard(triggerButton) {
+  revertTransientViews();
   persistActiveBoard();
   flashButton(triggerButton, "Saved!");
 }
@@ -2685,6 +2715,7 @@ function saveCurrentBoard(triggerButton) {
 // the team comp, and never moves/resets the view — a plain reload of the
 // current pan/zoom with the saved layout dropped back in.
 function quickSaveBoard(triggerButton) {
+  revertTransientViews();
   localStorage.setItem(quickSaveKey(activeBoardName), snapshotBoardOnly());
   flashButton(triggerButton, "Saved!");
 }
@@ -2696,6 +2727,7 @@ function quickLoadBoard(triggerButton) {
     return;
   }
   if (!window.confirm("Reload this board's layout from its last quick save? Unsaved board changes will be lost. (Team comp is untouched.)")) return;
+  revertTransientViews();
   restoreBoardOnly(saved);
   commit();
   flashButton(triggerButton, "Loaded!");
@@ -2707,6 +2739,7 @@ function deleteCurrentBoard() {
     return;
   }
   if (!window.confirm(`Delete board "${activeBoardName}"? This can't be undone.`)) return;
+  revertTransientViews();
   localStorage.removeItem(boardDataKey(activeBoardName));
   localStorage.removeItem(quickSaveKey(activeBoardName));
   boardsIndex = boardsIndex.filter(name => name !== activeBoardName);
