@@ -1936,7 +1936,7 @@ function renderPanel(hero) {
   // requested by the guide's author, keep it visible wherever they render.
   const credit = document.createElement("p");
   credit.className = "panel-credit";
-  credit.innerHTML = `Team-Up details from <a href="${TEAMUP_GUIDE_URL}" target="_blank" rel="noopener">Kane Carter's S9 Team-Ups guide</a> (u/-popgoes&nbsp;·&nbsp;@kanethecarter). Info, stats, and images taken from Marvel Rivals and the <a href="https://www.marvelrivals.com/heroes" target="_blank" rel="noopener">Marvel Rivals website</a>.`;
+  credit.innerHTML = `Team-Up details from <a href="${TEAMUP_GUIDE_URL}" target="_blank" rel="noopener">Kane Carter's S9 Team-Ups guide</a> (u/-popgoes&nbsp;·&nbsp;@kanethecarter).`;
   detailPanel.append(credit);
 }
 
@@ -2776,16 +2776,19 @@ function flashButton(button, text) {
   setTimeout(() => { button.textContent = original; }, 1200);
 }
 
-// Behind-the-scenes graph-theory facts — deliberately no hero names, and
-// deliberately no mention of which hero (or why) is the one permanent
-// exception to every loop.
+// Behind-the-scenes facts about how the site itself is built and quirks of
+// the raw dataset — deliberately kept separate from the "Full loop theory"
+// button's graph-cycle facts (see LOOP_THEORY_FACTS below) so the two don't
+// just repeat each other. Also deliberately no hero names, and deliberately
+// no mention of which hero (or why) is the one permanent exception to every
+// loop.
 const EASTER_EGG_FACTS = [
-  "This board's whole Team-Up web got put through some real graph theory.",
-  "No single loop can pass through every hero without repeating one — confirmed by exhaustively checking 3,651,668 possible routes. Zero worked.",
-  "The single longest loop that exists anywhere in this data touches 47 heroes.",
-  "If loops are never allowed to share a hero, it's mathematically impossible to ever include absolutely everyone, no matter how many loops you use — one particular cluster of 22 heroes only collectively leads to 19 others among themselves, so at least 3 of them can never get a private slot.",
-  "Letting loops share heroes (the natural way, since an icon can sit on more than one loop), a concrete arrangement of just 6 loops — sized 36, 4, 3, 13, 8, and 3 — touches every eligible hero. That's what the \"Full loop theory\" button draws.",
-  "In total, 290,752 distinct loops exist somewhere in this data, from tiny 3-hero triangles all the way up to that 47-hero giant."
+  "There's no server and no database behind this thing. Every board you build lives entirely in your browser's storage — nothing is ever sent anywhere.",
+  "New icons find open space with a spiral built on the golden angle (~137.5°) — the same angle sunflowers use to pack seeds without gaps.",
+  "Hero portraits are pulled live from official image servers, not stored here — if art gets updated upstream, this site's faces update with it automatically.",
+  "Two heroes tie for handing Team-Ups out to the most partners (4 each) — but across all 53 heroes, nobody receives more than 2 in return. Giving is a lot easier than getting picked.",
+  "Duelists alone (27) outnumber every Vanguard and Strategist on the roster combined — except one hero who refuses to commit to a single role at all.",
+  "There's a hidden move: hold right-click and drag over empty board space to lasso a group of heroes, then drag or remove them all at once."
 ];
 const easterEggPanel = document.querySelector("#easterEggPanel");
 const easterEggList = document.querySelector("#easterEggList");
@@ -2801,12 +2804,20 @@ const creditsPanel = document.querySelector("#creditsPanel");
 document.querySelector("#toggleCredits").addEventListener("click", () => creditsPanel.classList.toggle("hidden"));
 document.querySelector("#closeCredits").addEventListener("click", () => creditsPanel.classList.add("hidden"));
 
-// "Full loop theory" gets the same graph-theory facts, but surfaced right
-// where a curious user is already looking (opened automatically alongside
-// the visualization) rather than tucked behind the footer egg button.
+// "Full loop theory" gets its own graph-cycle facts, surfaced right where a
+// curious user is already looking (opened automatically alongside the
+// visualization) rather than tucked behind the footer egg button.
+const LOOP_THEORY_FACTS = [
+  "This board's whole Team-Up web got put through some real graph theory.",
+  "No single loop can pass through every hero without repeating one — confirmed by exhaustively checking 3,651,668 possible routes. Zero worked.",
+  "The single longest loop that exists anywhere in this data touches 47 heroes.",
+  "If loops are never allowed to share a hero, it's mathematically impossible to ever include absolutely everyone, no matter how many loops you use — one particular cluster of 22 heroes only collectively leads to 19 others among themselves, so at least 3 of them can never get a private slot.",
+  "Letting loops share heroes (the natural way, since an icon can sit on more than one loop), a concrete arrangement of just 6 loops — sized 36, 4, 3, 13, 8, and 3 — touches every eligible hero. That's what the \"Full loop theory\" button draws.",
+  "In total, 290,752 distinct loops exist somewhere in this data, from tiny 3-hero triangles all the way up to that 47-hero giant."
+];
 const loopTheoryPanel = document.querySelector("#loopTheoryPanel");
 const loopTheoryFactsList = document.querySelector("#loopTheoryFactsList");
-EASTER_EGG_FACTS.forEach(fact => {
+LOOP_THEORY_FACTS.forEach(fact => {
   const li = document.createElement("li");
   li.textContent = fact;
   loopTheoryFactsList.append(li);
