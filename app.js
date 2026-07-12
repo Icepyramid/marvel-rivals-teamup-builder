@@ -158,7 +158,7 @@ const teamupInfo = {
       base: "Ricochet Force applies burn damage (14d/s) over time (3s). Hitting a burning target with Optic Blast or Concussive Beam instantly triggers 50% of the remaining damage.",
       enhanced: "Spark detonations reduce Ricochet Force cooldown (0.5s)." },
     { from: "Gambit", name: "Kinetic Kin", slot: "C",
-      base: "Activate to gain a Speed Boost (+40%) and increased jump height (+5m/s) for 6 seconds. 18s cooldown.",
+      base: "Activate to gain a Speed Boost (+40%) and increased jump height (+5m/s) for 6 seconds. 15s cooldown.",
       enhanced: "Activating now increases attack speed for Optic Blast (+25%) and Concussive Beam (+10%)." }
   ],
   "Daredevil": [
@@ -211,7 +211,7 @@ const teamupInfo = {
   ],
   "Gambit": [
     { from: "Magneto", name: "Favorable Odds", slot: "C",
-      base: "Summon a dome (5m radius for 5s) that heals allies (50h/s) and damages enemies (50d/s) in range, while also launching enemies back. 15s cooldown.",
+      base: "Summon a dome (5m radius for 5s) that heals allies (55h/s) and damages enemies (50d/s) in range, while also launching enemies back. 15s cooldown.",
       enhanced: "The dome now explodes at the end of its duration, dealing additional damage (40d) and healing (60h)." },
     { from: "Jubilee", name: "Sparkling Staff", slot: "C",
       base: "Provide healing to nearby allies (8m radius, 70h/s) and damage to nearby enemies (5m radius, 45d/s) while blocking damage from projectiles (1.5s).",
@@ -262,7 +262,7 @@ const teamupInfo = {
       base: "Guardian Shield has increased health (300h) and now boosts damage from projectiles fired by allies that pass through it (+20%).",
       enhanced: "Guardian Shield is larger and has further increased health (400h)." },
     { from: "Mister Fantastic", name: "First Family", slot: "C",
-      base: "Enter Invisible state with nearby allies (4s), gaining healing (15h/s) and a Speed Boost (+1.2m/s). Invisible state ends briefly if damage is taken or dealt.",
+      base: "Enter Invisible state with nearby allies (4s), gaining healing (25h/s) and a Speed Boost (+1.2m/s). Invisible state ends briefly if damage is taken or dealt.",
       enhanced: "Invisible lasts longer (6s), heals more (25h/s) and has a stronger Speed Boost (+1.8m/s)." }
   ],
   "Iron Fist": [
@@ -278,7 +278,7 @@ const teamupInfo = {
       base: "Armor Overdrive now provides a Gamma Shield (75h for 2s) and increases the damage of Repulsor Blast's direct hits (45d > 50d), its splash damage (60d > 65d), and Unibeam (180d/s > 200d/s) even further.",
       enhanced: "Invincible Pulse Cannon now also provides a Gamma Shield (75h for 2s) and its projectile deals damage (45d) to nearby enemies as it flies." },
     { from: "Thor", name: "Thunder Overdrive", slot: "Passive",
-      base: "The range of Unibeam is increased (2m). Unibeam also deals bonus damage (84d/s) to enemies caught near the beam's outer ring (0.75m radius). Armor Overdrive increases bonus damage (108d/s) and outer ring size (1/2m radius).",
+      base: "The range of Unibeam is increased (2m). Unibeam also deals bonus damage (70d/s) to enemies caught near the beam's outer ring (0.75m radius). Armor Overdrive increases bonus damage (85d/s) and outer ring size (1/2m radius).",
       enhanced: "Armor Overdrive's cooldown is reduced (-5s)." }
   ],
   "Jeff the Land Shark": [
@@ -294,7 +294,7 @@ const teamupInfo = {
       base: "When Attack Speed is increased (via Sparking Sprint or triggering a Sparkle Mark), Energy Plasmoids become hitscan (5d / 6.5h), grant self-healing on hit (2h), and can deal critical hits.",
       enhanced: "Sparkle Marks are not cleared on hit, allowing Attack Speed increase to be re-triggered indefinitely." },
     { from: "Blade", name: "Vampiric Kin", slot: "C",
-      base: "Activate a field around you (12m radius) that converts damage into healing (25%) for you and allies for its duration (6s). 15s cooldown.",
+      base: "Activate a field around you (12m radius) that converts damage into healing (30%) for you and allies for its duration (6s). 15s cooldown.",
       enhanced: "The field now also provides healing over time (25h/s)." }
   ],
   "Loki": [
@@ -331,7 +331,7 @@ const teamupInfo = {
   ],
   "Mantis": [
     { from: "Star-Lord", name: "Star Blossom", slot: "upgrades Right-Click",
-      base: "Healing Flower has increased healing (15h+3%mh/s). Also, applying a Healing Flower on an ally who already has the effect will enhance its healing rate (17.5h+3.5%mh/s) even further, and heal nearby (8m radius) allies (7.5h+1.75%mh/s).",
+      base: "Healing Flower has increased healing (15h+3%mh/s). Also, applying a Healing Flower on an ally who already has the effect will enhance its healing rate (15h+3.5%mh/s) even further, and heal nearby (8m radius) allies (7.5h+1.75%mh/s).",
       enhanced: "Healing Flower now applies the enhanced healing rate and heals nearby allies on its first cast." },
     { from: "Adam Warlock", name: "Vitality Pact", slot: "Passive",
       base: "Self-healing from using Natural Anger is increased (+5h/s). Also, freely move as a soul upon defeat, healing allies in a radius (5h/s) and reviving at a chosen spot. 90s cooldown.",
@@ -374,12 +374,12 @@ const teamupInfo = {
       base: "Telekinesis Burst is replaced with Phoenix Netherfire which quickly blasts the same location 3 times, each time applying 1 Spark. First blast inflicts damage (15d) and Stun. Second and third blasts inflict damage (20d) and Healing Reduction (-40% for 3s). Cooldown is increased (+2s).",
       enhanced: "Each explosion now applies 2 Sparks." },
     { from: "Rogue", name: "Telekinetic Beatdown", slot: "C",
-      base: "Fire a delayed hitscan shot forward, with infinite range, that sends the Phoenix Force to attack the target (40d), attacking additional targets (40d) if they are in range of the previous (8m radius, max 3 bounces). Each attack also applies 1 Spark and provides self-healing (50h). 12s cooldown.",
+      base: "Fire a delayed hitscan shot forward, with infinite range, that sends the Phoenix Force to attack the target (45d), attacking additional targets (45d) if they are in range of the previous (8m radius, max 3 bounces). Each attack also applies 1 Spark and provides self-healing (50h). 10s cooldown.",
       enhanced: "The shockwave's detection radius is increased, max bounces is increased (+1), self-healing is increased (65h), and attacks now apply 2 Sparks." }
   ],
   "Psylocke": [
     { from: "Emma Frost", name: "Mental Projection", slot: "C",
-      base: "Project an illusion (5s) forward that uses Psi-Blade Dash, while you enter Stealth. The illusion mimics your movement and attacks (at your target) for a portion of damage (30%). 20s cooldown.",
+      base: "Project an illusion (3s) forward that uses Psi-Blade Dash, while you enter Stealth. The illusion mimics your movement and attacks (at your target) for a portion of damage (15%). 20s cooldown.",
       enhanced: "Activate the ability again to swap places with the illusion." },
     { from: "Cloak & Dagger", name: "Light & Dark Darts", slot: "C",
       base: "Summon a field (6m radius) that activates your Stealth, and send out darts around you that deal damage (30d) and heal you upon impact (20h) until duration ends (5s).",
@@ -387,10 +387,10 @@ const teamupInfo = {
   ],
   "Rocket Raccoon": [
     { from: "Squirrel Girl", name: "Mammalian Bond", slot: "C",
-      base: "Throw acorns (5) that can be consumed by allies, providing healing (20h) and reducing all cooldowns (-0.5s). 2 charges. 20s cooldown.",
+      base: "Throw acorns (5) that can be consumed by allies, providing healing (30h) and reducing all cooldowns (-0.5s). 2 charges. 20s cooldown.",
       enhanced: "Ability gains a third charge." },
     { from: "Groot", name: "Planet X Pals", slot: "C",
-      base: "Bombard Mode is replaced for a period (8s), launching projectiles (0.2s) that deal damage (18d) and damage over time (5d/s) within the splash (5m radius), while providing healing (15h) and Bonus Health (20bh) to allies. 12s cooldown.",
+      base: "Bombard Mode is replaced for a period (8s), launching projectiles (0.2s) that deal damage (18d) and damage over time (5d/s) within the splash (5m radius), while providing healing (20h) and Bonus Health (20bh) to allies. 12s cooldown.",
       enhanced: "The ability's duration is increased (+4s). You can also ride on Groot's shoulder." }
   ],
   "Rogue": [
@@ -2786,8 +2786,8 @@ const EASTER_EGG_FACTS = [
   "There's no server and no database behind this thing. Every board you build lives entirely in your browser's storage — nothing is ever sent anywhere.",
   "New icons find open space with a spiral built on the golden angle (~137.5°) — the same angle sunflowers use to pack seeds without gaps.",
   "Hero portraits are pulled live from official image servers, not stored here — if art gets updated upstream, this site's faces update with it automatically.",
-  "Two heroes tie for handing Team-Ups out to the most partners (4 each) — but across all 53 heroes, nobody receives more than 2 in return. Giving is a lot easier than getting picked.",
-  "Duelists alone (27) outnumber every Vanguard and Strategist on the roster combined — except one hero who refuses to commit to a single role at all.",
+  "Stan Lee's real-life cameo streak ran through nearly every Marvel movie for over a decade — no hidden cameo here, just this button instead.",
+  "\"With great power comes great responsibility\" has been Marvel's most-quoted line since 1962 — good advice for literally every Team-Up on this board.",
   "There's a hidden move: hold right-click and drag over empty board space to lasso a group of heroes, then drag or remove them all at once."
 ];
 const easterEggPanel = document.querySelector("#easterEggPanel");
