@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Marvel Rivals S9 Team-Up Builder</title>
-    <link rel="stylesheet" href="./styles.css?v=35">
+    <link rel="stylesheet" href="./styles.css?v=36">
   </head>
   <body>
     <div class="app-shell">
@@ -163,6 +163,8 @@
               <p>Season 9's Team-Up system is powerful, but genuinely chaotic to read — dozens of enablers and receivers scattered across the roster with no easy way to see who actually pairs with who. This site turns that mess into something you can look at: an interactive map of every Team-Up relationship, built to make the efficiency between enablers and receivers obvious at a glance, so you can find the comps that actually work — for your own games, or for proplay-level lineups.</p>
               <h4 class="credits-heading">Free, out of love for the game</h4>
               <p>No ads, no accounts, no tracking, no cost. Built purely because the game deserved a better tool than staring at a patch note — with <strong>Claude Code</strong> doing a lot of the heavy lifting alongside me.</p>
+              <h4 class="credits-heading">Up to date</h4>
+              <p>All Team-Up numbers on this site reflect the <strong>latest balance patch</strong> — the Season 9 emergency hotfix released <strong>July 11, 2026</strong> (<a href="https://www.marvelrivals.com/balancepost/20260711/41667_1307328.html" target="_blank" rel="noopener">official balance post</a>).</p>
               <h4 class="credits-heading">Team-Up descriptions</h4>
               <p>Every Team-Up ability description and its Base / Enhanced numbers come from <a href="https://docs.google.com/document/d/1sNXwLJ3VodDypfs46KtfcdIgoX_fyeCMpImZ3HJzmM4/" target="_blank" rel="noopener">"Marvel Rivals Season 9.0 Team-Ups — Super Simplified Guide"</a>, written and researched by <strong>Kane Carter</strong> (u/-popgoes · @kanethecarter). Thank you, Kane! Information, stats, and images taken from Marvel Rivals and the <a href="https://www.marvelrivals.com/heroes" target="_blank" rel="noopener">Marvel Rivals website</a>.</p>
               <h4 class="credits-heading">Made by</h4>
@@ -175,23 +177,50 @@
         <section class="comp-tray" aria-label="Team comp builder">
           <div id="compResizeHandle" class="comp-resize-handle" title="Drag to resize the team comp area"></div>
           <div class="comp-head">
-            <h3>Team comp</h3>
+            <div class="comp-mode-switch" role="group" aria-label="Bottom area mode">
+              <button id="modeComp" type="button" class="active" title="Build a 6-hero team comp">Team comp</button>
+              <button id="modeIgnite" type="button" title="Ignite ban-pick simulator — see how bans and protects shut down Team-Up availability, in the official Ignite series format">Ignite ban-pick</button>
+            </div>
             <span id="compStats">0/6 heroes</span>
           </div>
-          <div class="comp-slots-row">
+          <div class="comp-slots-row" id="compSlotsRow">
             <div class="comp-slots" id="compSlots"></div>
             <button id="compOnlyView" type="button" title="Clear the board down to just your team comp's icons and their links. Click again to bring your board back">Comp-only view</button>
           </div>
           <div class="comp-detail hidden" id="compDetail"></div>
+          <div class="ignite-sim hidden" id="ignitePanel">
+            <div class="ignite-columns">
+              <div class="ignite-team team-a">
+                <div class="ignite-team-head"><span class="ignite-team-name">Team A</span><span class="ignite-team-sub">bans remove heroes from Team B's pool</span></div>
+                <div class="ignite-slots" id="igniteBansA"></div>
+                <div class="ignite-slots" id="igniteProtectsA"></div>
+              </div>
+              <div class="ignite-team team-b">
+                <div class="ignite-team-head"><span class="ignite-team-name">Team B</span><span class="ignite-team-sub">bans remove heroes from Team A's pool</span></div>
+                <div class="ignite-slots" id="igniteBansB"></div>
+                <div class="ignite-slots" id="igniteProtectsB"></div>
+              </div>
+              <div class="ignite-controls">
+                <span class="ignite-view-label">Board shows the pool of</span>
+                <div class="ignite-view-switch" role="group" aria-label="Board perspective">
+                  <button id="igniteViewA" type="button" class="active">Team A</button>
+                  <button id="igniteViewB" type="button">Team B</button>
+                </div>
+                <button id="igniteClear" type="button" title="Clear every ban and protect">Clear all</button>
+                <p class="ignite-format-note">Ignite format: 3 bans + 2 protects per team. A ban only blocks the <em>enemy</em> team; a protect makes that hero unbannable for your side.</p>
+              </div>
+            </div>
+            <div class="ignite-impact" id="igniteImpact"></div>
+          </div>
         </section>
 
         <footer class="statusbar">
           <span id="boardStats">0 heroes on board</span>
-          <span>Drag icons freely. Lines update live. <button id="toggleCredits" class="credits-btn" type="button" title="Why this site exists, and who made it">Credits</button> <button id="easterEgg" class="easter-egg-btn" type="button" title="???">&#129371;</button></span>
+          <span><span class="patch-chip" title="All Team-Up numbers reflect the Season 9 emergency hotfix released July 11, 2026">✓ Patch 2026/07/11</span> Drag icons freely. Lines update live. <button id="toggleCredits" class="credits-btn" type="button" title="Why this site exists, and who made it">Credits</button> <button id="easterEgg" class="easter-egg-btn" type="button" title="???">&#129371;</button></span>
         </footer>
       </main>
     </div>
 
-    <script src="./app.js?v=35"></script>
+    <script src="./app.js?v=36"></script>
   </body>
 </html>

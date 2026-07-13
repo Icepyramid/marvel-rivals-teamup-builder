@@ -507,6 +507,66 @@ const teamupInfo = {
   ]
 };
 
+// One "dark history" fun fact per hero — their real performance rap sheet in
+// Marvel Rivals (launch disasters, permaban eras, infamous exploits, meme
+// scoreboards). Shown at the bottom of the hero detail panel. Deliberately
+// no mention of loop mechanics here.
+const HERO_DARK_HISTORY = {
+  "Adam Warlock": "His team-wide revive ult defined the launch-era \"nothing ever dies\" stall meta — nerfed until coming back to life stopped feeling like a free win.",
+  "Angela": "Arrived to enormous hype as Heven's warrior queen, then spent her first patches as a stat-check the community couldn't agree was overpowered or unplayable.",
+  "Black Cat": "Her whole kit is luck-themed, which is fitting — her early win rate swung wildly from patch to patch like she was flipping coins for it.",
+  "Black Panther": "A god at high ranks, a throw pick everywhere else — the infinite Spirit Rend reset dream dies the instant one Vibranium Mark misses.",
+  "Black Widow": "Spent most of the game's life as the consensus worst hero in Rivals — pros joked the enemy locking Widow meant playing 6v5. Several reworks later, her patch notes finally say \"increase\".",
+  "Blade": "Teased in cinematics ages before he was ever playable — one of the longest hero waits in Rivals history — then arrived with lifesteal numbers the balance team has been fiddling with ever since.",
+  "Captain America": "Launch Cap did so little damage the community timed how long he needed to solo-kill a Strategist; the answer was \"never\". Seasons of buffs later he became a must-ban dive terror. Redemption arc complete.",
+  "Cloak & Dagger": "Forever branded the \"no-aim healer\" — and forever putting up the quiet numbers that push autolock nerf threads to the top of the subreddit.",
+  "Cyclops": "Launched into Season 9 undertuned enough that the very first emergency hotfix had to hand him damage back. Even his optic blasts needed glasses.",
+  "Daredevil": "Billed as the duelist who \"sees\" everything without eyes — low-rank lobbies have been filing wallhack complaints about him since day one.",
+  "Deadpool": "The only hero who refuses to pick a role — and the balance team's permanent migraine, since every number in his kit has to be written three times.",
+  "Devil Dinosaur": "A literal dinosaur with the hitbox to prove it — the moment the enemy runs anti-tank, he turns into a 30-meter-wide \"shoot here\" sign.",
+  "Doctor Strange": "His spawn portals produced the most infamous exploit era in Rivals history — cross-map Hela executions through a hole in reality. No single ability has been patched more.",
+  "Elsa Bloodstone": "A monster hunter balanced around coordinated trap play — something solo queue has not delivered even once in recorded history.",
+  "Emma Frost": "Launched straight into the meta and never really left — Diamond Form turned \"just shoot the tank\" from a plan into a suggestion.",
+  "Gambit": "Buffed three separate ways in Season 9's very first emergency hotfix — when the patch is mostly about you, your launch didn't go great, mon ami.",
+  "Groot": "More teammates have died to a friendly Groot wall than to some enemy duelists — sealing your own healer inside a Moon Knight ult is a Rivals rite of passage.",
+  "Hawkeye": "In the launch meta the most feared sound in the game was a bowstring — cross-map one-shots made him the second permaban after Hela, and the nerf that followed was biblical.",
+  "Hela": "The original queen of Rivals — banned in essentially every launch-era lobby that could ban, with a nerf list that reads like a novella. Four Team-Ups later, she still runs the family business.",
+  "Hulk": "The face of the launch \"gamma\" meta — and of the saddest sight in Rivals: an ulting Hulk burst down mid-air and landing as tiny, apologetic Banner.",
+  "Human Torch": "Flame on, fall off — launched hot, got extinguished by sustained hitscan, and his Storm tornado-ignition combo has lived on the nerf watchlist ever since.",
+  "Invisible Woman": "Arrived so strong that \"shoot the healer\" stopped being advice — nobody could see her. Her shields helped define an era of overtime that simply refused to end.",
+  "Iron Fist": "The most reported hero of the launch window — a flying punch tornado that ate low-rank backlines while pros barely touched him. Nerfed into meditation; occasionally reawakened.",
+  "Iron Man": "Launch Iron Man flew with a permanent Hela-shaped bounty on his head — hovering was a death sentence. And this very hotfix just trimmed his Thor beam. The suit cannot catch a break.",
+  "Jeff the Land Shark": "Committed the most famous war crime in Rivals history: swallowing the entire enemy team (plus several friends) and carrying them all off the map. The nerf was instant. The memory is forever.",
+  "Jubilee": "The fireworks are new but the pattern is showing — buffed in Season 9's first emergency hotfix, which is patch-note language for \"sorry about launch\".",
+  "Loki": "Invented Rivals' most degenerate combo: copying Luna's ult so the objective spent twenty straight seconds inside someone's invincibility concert. The energy nerfs are his true legacy.",
+  "Luna Snow": "Her ult once kept entire teams immortal so long that games came down to whose concert ended first — the defining stall meta the game has been nerfing ever since.",
+  "Magik": "Mid at launch, then the buffs hit — Darkchild started deleting tanks and \"nerf Magik\" became its own genre of Reddit post.",
+  "Magneto": "Author of the greatest single play in Rivals: eating a full Punisher ult with his sphere and returning it as a one-shot meatball. Also author of countless self-detonations from greeding that same sphere.",
+  "Mantis": "Launch Mantis was arguably the best hero in the game, healer or not — boosting her own damage to duelist numbers while the backline napped. Season 9's first hotfix nerfed her healing again. Some things never change.",
+  "Mister Fantastic": "The stretchiest bait in the game — inflates to eat an entire ult's worth of damage, then spends whole seasons flopped out of the pro meta entirely.",
+  "Moon Knight": "His ankh ult once deleted six stacked players before the voice line finished — the fastest team wipe ever recorded, nerfed into a slower, more polite team wipe.",
+  "Namor": "The permanent anti-dive answer — his squids have ended more Spider-Man careers than any nerf ever could. Dive players ban him on principle.",
+  "Peni Parker": "Turned defense spawn into a mined bunker so oppressive that tournaments were played around never touching her web — then got dragged out of it, patch by patch.",
+  "Phoenix": "The literal cosmic force of death and rebirth — hotfixed back to life within a week of Season 9 because her damage numbers arrived pre-cremated.",
+  "Psylocke": "The high-skill dive queen with a permanent seat on the balance watchlist — sure enough, Season 9's first hotfix trimmed her crossbow, her illusion, and her Team-Ups all in one sitting.",
+  "Rocket Raccoon": "Spent years as the hero the patch notes forgot — near-unkillable, never buffed, never nerfed, damage memed as \"decorative\". Season 9 finally remembered him… to buff his acorns.",
+  "Rogue": "Absorbs powers, absorbs nerfs — a Vanguard whose identity is stealing the enemy's stats, which makes her a balance incident waiting to happen every time anyone else gets buffed.",
+  "Scarlet Witch": "The eternal beginner's menace — lock-on damage that farms casual lobbies while pros leave her on the shelf, and an ult announced so loudly it mostly kills nobody.",
+  "Spider-Man": "Simultaneously the most-hated hero in low ranks and the lowest-win-rate hero in the game for entire seasons — everyone tilts against him, nobody actually wins with him.",
+  "Squirrel Girl": "Low-rank artillery incarnate — statistically fine, emotionally devastating. Her ricochet acorn spam has ruined more casual evenings than any actual meta pick.",
+  "Star-Lord": "His ult is a literal aimbot, balanced for years by everything else on his kit being forgettable — the classic \"terror in metal ranks, benched by pros\" résumé.",
+  "Storm": "The greatest glow-up in Rivals history: launch's consensus worst duelist — a slow-floating training dummy — reworked into a must-ban hurricane that has never left the meta since.",
+  "The Hood": "Made a deal with a demon and still can't buy consistency — every patch either his veils are oppressive or his gun is a water pistol, with no in-between discovered yet.",
+  "The Punisher": "The tutorial boss of hitscan — shreds anything that walks at him in a straight line, folds to anyone who jumps. Pros used him as a \"shield check\" for entire seasons.",
+  "The Thing": "Unstoppable, unkillable, and unable to reach anyone — launched as a clobbering statue whose matchups were decided entirely by whether the enemy felt like walking over to him.",
+  "Thor": "Spent the early seasons as the vanguard nobody asked for — micromanaging Thorforce for mid results — repeatedly dragged back into relevance by his Team-Ups rather than his own hammer.",
+  "Ultron": "The robot uprising's first defeat was a hotfix: Season 9's opening patch cut his Peni drone healing by more than half and stretched the cooldown for good measure.",
+  "Venom": "The most instalocked vanguard in the game and proud owner of a thousand \"0 final blows, 8 deaths\" scoreboards — a dive tank whose floor is the planet's core and whose ceiling is genuinely terrifying.",
+  "White Fox": "Nine tails, and early players swore about seven of them were cosmetic — her Fox Form windows have been re-tuned nearly every patch since she arrived.",
+  "Winter Soldier": "AGAIN. AGAIN. AGAIN. His infinite ult-reset chains produced the most famous voice line and the most demoralizing kill feed in the game — nerfed, never forgotten.",
+  "Wolverine": "Started launch with the lowest pick rate and win rate in the game, written off as unplayable — until someone did the math on his percent-HP damage and he became the most banned tank-shredder in Rivals. From meme to menace."
+};
+
 const portraits = {
   "Jubilee": "https://r.res.easebar.com/pic/20260708/48ff52bf-6f30-4350-b883-00f2652015dd.png",
   "Cyclops": "https://r.res.easebar.com/pic/20260612/8cf04b13-2e3c-49bc-8f90-000732c94f43.png",
@@ -1325,6 +1385,7 @@ function renderHeroList(filter = "") {
       button.append(count);
 
       button.addEventListener("click", () => {
+        if (igniteAssign(hero)) return;
         if (pickingSlot !== null) {
           fillSlot(pickingSlot, hero);
           return;
@@ -1445,6 +1506,7 @@ function addNode(hero, x, y, options = {}) {
       el.dataset.dragged = "false";
       return;
     }
+    if (igniteAssign(hero)) return;
     if (pickingSlot !== null) {
       fillSlot(pickingSlot, hero);
       return;
@@ -1794,6 +1856,7 @@ function panelRow(hero, type) {
   row.append(arrow);
 
   row.addEventListener("click", () => {
+    if (igniteAssign(hero)) return;
     if (pickingSlot !== null) {
       fillSlot(pickingSlot, hero);
       return;
@@ -1932,12 +1995,16 @@ function renderPanel(hero) {
   detailPanel.append(panelSection("Team-Up Partners", `Who enhances ${hero}`, incoming[hero] || [], "incoming"));
   detailPanel.append(panelSection("Enhances", `Heroes ${hero} enhances`, relationships[hero] || [], "outgoing"));
 
-  // Required credit for the Team-Up descriptions behind each row's ⓘ —
-  // requested by the guide's author, keep it visible wherever they render.
-  const credit = document.createElement("p");
-  credit.className = "panel-credit";
-  credit.innerHTML = `Team-Up details from <a href="${TEAMUP_GUIDE_URL}" target="_blank" rel="noopener">Kane Carter's S9 Team-Ups guide</a> (u/-popgoes&nbsp;·&nbsp;@kanethecarter).`;
-  detailPanel.append(credit);
+  // Per-hero "dark history" fun fact — a light meta-history jab about how
+  // this hero has actually performed in Marvel Rivals. Attribution for the
+  // Team-Up descriptions lives solely in the Credits panel now.
+  const fact = HERO_DARK_HISTORY[hero];
+  if (fact) {
+    const darkHistory = document.createElement("p");
+    darkHistory.className = "panel-dark-history";
+    darkHistory.innerHTML = `<span class="dark-history-tag">Dark history</span> ${fact}`;
+    detailPanel.append(darkHistory);
+  }
 }
 
 // Adding a hero to the comp brings it onto the board too, connected only to
@@ -2081,6 +2148,8 @@ function renderComp() {
 }
 
 function renderCompStats() {
+  // In Ignite mode the header line belongs to the simulator, not the comp.
+  if (igniteOn) return;
   const filled = state.comp.filter(Boolean);
   let internal = 0;
   for (const a of filled) {
@@ -2208,10 +2277,13 @@ function renderLinks() {
     linkLayer.append(hit);
 
     const manuallyHidden = state.hiddenLinks.has(id);
-    // Colorless if unconfirmed ("preview"), or if a board role filter is
-    // active and neither endpoint is related to that role (Flex is exempt).
+    // Colorless if unconfirmed ("preview"), if a board role filter is
+    // active and neither endpoint is related to that role (Flex is exempt),
+    // or if the Ignite simulator says either endpoint is banned out of the
+    // currently viewed team's pool — that Team-Up is shut down for them.
     const roleRelated = !boardRoleFilter || !roleFilterDimmed(link.source) || !roleFilterDimmed(link.target);
-    const colorless = link.preview || !roleRelated;
+    const igniteDead = igniteShutdown(link.source) || igniteShutdown(link.target);
+    const colorless = link.preview || !roleRelated || igniteDead;
     // While a role filter is active, colorless links disappear entirely
     // instead of showing dim/gray, to declutter the filtered view.
     const hideForRoleFilter = boardRoleFilter && colorless;
@@ -2235,7 +2307,9 @@ function renderLinks() {
   for (const [hero, node] of state.nodes) {
     const show = !filtered || hero === state.selected || (visibleLinkCount.get(hero) || 0) > 0;
     node.el.style.display = show ? "" : "none";
-    node.el.classList.toggle("colorless", !!node.preview || roleFilterDimmed(hero));
+    const banned = igniteShutdown(hero);
+    node.el.classList.toggle("colorless", !!node.preview || roleFilterDimmed(hero) || banned);
+    node.el.classList.toggle("ignite-banned", banned);
   }
 }
 
@@ -2639,6 +2713,277 @@ document.querySelector("#closeHelp").addEventListener("click", () => helpPanel.c
 document.querySelector("#resetLinkColors").addEventListener("click", resetLinkColors);
 document.querySelector("#fullLoopTheory").addEventListener("click", toggleFullLoopTheory);
 document.querySelector("#compOnlyView").addEventListener("click", toggleCompOnlyView);
+
+// ---- Ignite ban-pick simulator ----
+// Official Ignite series draft rules: each team gets 3 bans (which remove
+// heroes from the OPPOSING team's pool only) and 2 protects (own heroes the
+// enemy is then not allowed to ban). The simulator lets you fill both
+// teams' bans/protects and see, per team pool, exactly which Team-Ups get
+// shut down — colorless icons/links on the board plus an impact readout.
+// State lives in its own localStorage key and never touches board saves.
+const IGNITE_KEY = "teamup-ignite-sim";
+const IGNITE_BAN_SLOTS = 3;
+const IGNITE_PROTECT_SLOTS = 2;
+const TOTAL_TEAMUPS = Object.values(relationships).reduce((sum, list) => sum + list.length, 0);
+
+let igniteOn = false;
+let igniteArming = null; // { team: "A"|"B", kind: "ban"|"protect", index }
+
+function loadIgnite() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(IGNITE_KEY) || "null");
+    if (saved && Array.isArray(saved.bansA)) return saved;
+  } catch { /* fall through to default */ }
+  return {
+    bansA: Array(IGNITE_BAN_SLOTS).fill(null),
+    bansB: Array(IGNITE_BAN_SLOTS).fill(null),
+    protectsA: Array(IGNITE_PROTECT_SLOTS).fill(null),
+    protectsB: Array(IGNITE_PROTECT_SLOTS).fill(null),
+    view: "A"
+  };
+}
+const ignite = loadIgnite();
+
+function saveIgnite() {
+  localStorage.setItem(IGNITE_KEY, JSON.stringify(ignite));
+}
+
+// Heroes unavailable in `team`'s pool = every hero the OTHER team banned.
+function igniteBannedFor(team) {
+  const enemyBans = team === "A" ? ignite.bansB : ignite.bansA;
+  return new Set(enemyBans.filter(Boolean));
+}
+
+function igniteShutdown(hero) {
+  return igniteOn && igniteBannedFor(ignite.view).has(hero);
+}
+
+// All [provider, receiver] Team-Up pairs killed by a set of banned heroes.
+function teamupsKilledBy(bannedSet) {
+  const killed = [];
+  for (const [source, targets] of Object.entries(relationships)) {
+    for (const target of targets) {
+      if (bannedSet.has(source) || bannedSet.has(target)) killed.push([source, target]);
+    }
+  }
+  return killed;
+}
+
+// How many still-alive Team-Ups in `team`'s pool would die if `hero` were
+// additionally banned — the marginal impact, not the raw degree.
+function igniteMarginalImpact(hero, team) {
+  const banned = igniteBannedFor(team);
+  if (banned.has(hero)) return 0;
+  let count = 0;
+  for (const receiver of relationships[hero] || []) {
+    if (!banned.has(receiver)) count++;
+  }
+  for (const provider of incoming[hero] || []) {
+    if (!banned.has(provider)) count++;
+  }
+  return count;
+}
+
+// Returns true when the click was consumed by an armed ignite slot.
+function igniteAssign(hero) {
+  if (!igniteOn || !igniteArming) return false;
+  const { team, kind, index } = igniteArming;
+  const enemy = team === "A" ? "B" : "A";
+  if (kind === "ban" && ignite[`protects${enemy}`].includes(hero)) {
+    igniteNotice(`${hero} is protected by Team ${enemy} — can't be banned.`);
+    return true;
+  }
+  if (kind === "protect" && ignite[`bans${enemy}`].includes(hero)) {
+    igniteNotice(`${hero} is already banned by Team ${enemy} — too late to protect them.`);
+    return true;
+  }
+  const list = ignite[`${kind}s${team}`];
+  if (list.includes(hero)) {
+    igniteNotice(`${hero} is already in Team ${team}'s ${kind} list.`);
+    return true;
+  }
+  list[index] = hero;
+  igniteArming = null;
+  saveIgnite();
+  renderIgnite();
+  renderLinks();
+  return true;
+}
+
+let igniteNoticeText = "";
+function igniteNotice(text) {
+  igniteNoticeText = text;
+  renderIgnite();
+}
+
+function igniteChip(team, kind, index) {
+  const hero = ignite[`${kind}s${team}`][index];
+  const chip = document.createElement("button");
+  chip.type = "button";
+  const arming = igniteArming && igniteArming.team === team && igniteArming.kind === kind && igniteArming.index === index;
+  chip.className = `ignite-chip ${kind}` + (hero ? " filled" : "") + (arming ? " arming" : "");
+  if (hero) {
+    chip.append(makeFace(hero));
+    const impact = kind === "ban" ? teamupImpactLabel(hero, team) : "";
+    chip.title = kind === "ban"
+      ? `${hero} — banned by Team ${team} (blocks Team ${team === "A" ? "B" : "A"}). Click to replace, right-click to clear.`
+      : `${hero} — protected by Team ${team} (the enemy can't ban them). Click to replace, right-click to clear.`;
+    const text = document.createElement("span");
+    text.className = "ignite-chip-text";
+    text.innerHTML = `<span class="ignite-chip-name">${hero}</span>${impact}`;
+    chip.append(text);
+  } else {
+    chip.textContent = arming ? "Click any hero…" : (kind === "ban" ? `Ban ${index + 1}` : `Protect ${index + 1}`);
+    chip.title = `Click to arm this slot, then click any hero (sidebar, board, or panel) to ${kind} them.`;
+  }
+  chip.addEventListener("click", () => {
+    igniteArming = arming ? null : { team, kind, index };
+    igniteNoticeText = "";
+    renderIgnite();
+  });
+  chip.addEventListener("contextmenu", event => {
+    event.preventDefault();
+    ignite[`${kind}s${team}`][index] = null;
+    if (arming) igniteArming = null;
+    saveIgnite();
+    renderIgnite();
+    renderLinks();
+  });
+  return chip;
+}
+
+// Small "kills N Team-Ups" annotation for a filled ban chip: how many pairs
+// this ban removes from the enemy pool (counting overlaps with the team's
+// other bans only once, in slot order).
+function teamupImpactLabel(hero, team) {
+  const enemy = team === "A" ? "B" : "A";
+  const bans = ignite[`bans${team}`].filter(Boolean);
+  const before = new Set(bans.slice(0, bans.indexOf(hero)));
+  let count = 0;
+  for (const receiver of relationships[hero] || []) if (!before.has(receiver)) count++;
+  for (const provider of incoming[hero] || []) if (!before.has(provider)) count++;
+  return `<span class="ignite-chip-impact">kills ${count} Team-Up${count === 1 ? "" : "s"} for Team ${enemy}</span>`;
+}
+
+function renderIgnite() {
+  if (!igniteOn) return;
+  for (const team of ["A", "B"]) {
+    const bansWrap = document.querySelector(`#igniteBans${team}`);
+    const protectsWrap = document.querySelector(`#igniteProtects${team}`);
+    bansWrap.innerHTML = "";
+    protectsWrap.innerHTML = "";
+    for (let i = 0; i < IGNITE_BAN_SLOTS; i++) bansWrap.append(igniteChip(team, "ban", i));
+    for (let i = 0; i < IGNITE_PROTECT_SLOTS; i++) protectsWrap.append(igniteChip(team, "protect", i));
+  }
+  document.querySelector("#igniteViewA").classList.toggle("active", ignite.view === "A");
+  document.querySelector("#igniteViewB").classList.toggle("active", ignite.view === "B");
+  renderIgniteImpact();
+}
+
+function renderIgniteImpact() {
+  const wrap = document.querySelector("#igniteImpact");
+  wrap.innerHTML = "";
+  const team = ignite.view;
+  const enemy = team === "A" ? "B" : "A";
+  const banned = igniteBannedFor(team);
+
+  if (igniteNoticeText) {
+    const notice = document.createElement("p");
+    notice.className = "ignite-notice";
+    notice.textContent = igniteNoticeText;
+    wrap.append(notice);
+  }
+  if (igniteArming) {
+    const hint = document.createElement("p");
+    hint.className = "ignite-hint-line";
+    hint.textContent = `Armed: Team ${igniteArming.team} ${igniteArming.kind} ${igniteArming.index + 1} — click any hero in the sidebar, on the board, or in the detail panel to assign.`;
+    wrap.append(hint);
+  }
+
+  const killed = teamupsKilledBy(banned);
+  const summary = document.createElement("p");
+  summary.className = "ignite-summary";
+  summary.innerHTML = banned.size
+    ? `<strong>Team ${team}'s pool:</strong> ${TOTAL_TEAMUPS - killed.length} of ${TOTAL_TEAMUPS} Team-Ups still alive — <strong>${killed.length} shut down</strong> by Team ${enemy}'s bans (${[...banned].join(", ")}). Shut-down icons/links show colorless on the board.`
+    : `<strong>Team ${team}'s pool:</strong> all ${TOTAL_TEAMUPS} Team-Ups alive — Team ${enemy} hasn't banned anyone yet.`;
+  wrap.append(summary);
+
+  // Heroes left completely dry: still pickable, but every provider that
+  // could enhance them is banned — they bring zero Team-Up ability options.
+  const dry = heroes.filter(hero =>
+    !banned.has(hero)
+    && (incoming[hero] || []).length > 0
+    && (incoming[hero] || []).every(provider => banned.has(provider))
+  );
+  if (dry.length) {
+    const dryLine = document.createElement("p");
+    dryLine.className = "ignite-dry";
+    dryLine.innerHTML = `<strong>Left dry for Team ${team}:</strong> ${dry.join(", ")} — still pickable, but every hero who could enhance them is banned.`;
+    wrap.append(dryLine);
+  }
+
+  // Draft advice, both directions, based on marginal impact in each pool.
+  const enemyProtected = new Set(ignite[`protects${enemy}`].filter(Boolean));
+  const banTargets = heroes
+    .filter(hero => !igniteBannedFor(enemy).has(hero) && !enemyProtected.has(hero))
+    .map(hero => [hero, igniteMarginalImpact(hero, enemy)])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  const ownProtected = new Set(ignite[`protects${team}`].filter(Boolean));
+  const protectTargets = heroes
+    .filter(hero => !banned.has(hero) && !ownProtected.has(hero))
+    .map(hero => [hero, igniteMarginalImpact(hero, team)])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  const advice = document.createElement("p");
+  advice.className = "ignite-advice";
+  advice.innerHTML =
+    `<strong>Best next bans for Team ${team}:</strong> ${banTargets.map(([hero, impact]) => `${hero} (kills ${impact})`).join(" · ")}`
+    + `<br><strong>Most worth protecting for Team ${team}:</strong> ${protectTargets.map(([hero, impact]) => `${hero} (${impact} Team-Ups at stake)`).join(" · ")}`;
+  wrap.append(advice);
+}
+
+function setBottomMode(mode) {
+  igniteOn = mode === "ignite";
+  igniteArming = null;
+  igniteNoticeText = "";
+  document.querySelector("#modeComp").classList.toggle("active", !igniteOn);
+  document.querySelector("#modeIgnite").classList.toggle("active", igniteOn);
+  document.querySelector("#compSlotsRow").classList.toggle("force-hidden", igniteOn);
+  document.querySelector("#compDetail").classList.toggle("force-hidden", igniteOn);
+  document.querySelector("#ignitePanel").classList.toggle("hidden", !igniteOn);
+  if (igniteOn) {
+    document.querySelector("#compStats").textContent = "Ignite draft: 3 bans + 2 protects per team";
+    renderIgnite();
+  } else {
+    renderCompStats();
+  }
+  renderLinks();
+}
+document.querySelector("#modeComp").addEventListener("click", () => setBottomMode("comp"));
+document.querySelector("#modeIgnite").addEventListener("click", () => setBottomMode("ignite"));
+document.querySelector("#igniteViewA").addEventListener("click", () => {
+  ignite.view = "A";
+  saveIgnite();
+  renderIgnite();
+  renderLinks();
+});
+document.querySelector("#igniteViewB").addEventListener("click", () => {
+  ignite.view = "B";
+  saveIgnite();
+  renderIgnite();
+  renderLinks();
+});
+document.querySelector("#igniteClear").addEventListener("click", () => {
+  ignite.bansA = Array(IGNITE_BAN_SLOTS).fill(null);
+  ignite.bansB = Array(IGNITE_BAN_SLOTS).fill(null);
+  ignite.protectsA = Array(IGNITE_PROTECT_SLOTS).fill(null);
+  ignite.protectsB = Array(IGNITE_PROTECT_SLOTS).fill(null);
+  igniteArming = null;
+  saveIgnite();
+  renderIgnite();
+  renderLinks();
+});
 
 // ---- Route finder: pick a start/end hero, show up to 3 shortest routes ----
 const routePanel = document.querySelector("#routePanel");

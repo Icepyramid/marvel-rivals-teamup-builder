@@ -917,6 +917,45 @@ button:disabled {
   color: var(--gold);
 }
 
+/* Per-hero "dark history" fun fact at the bottom of the detail panel. */
+.panel-dark-history {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  background: rgba(255, 91, 130, 0.06);
+  border: 1px solid rgba(255, 91, 130, 0.18);
+  border-radius: 10px;
+}
+
+.dark-history-tag {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff8aa6;
+  background: rgba(255, 91, 130, 0.14);
+}
+
+/* Footer chip stating which balance patch the data matches. */
+.patch-chip {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--strategist);
+  background: rgba(76, 240, 181, 0.1);
+  border: 1px solid rgba(76, 240, 181, 0.25);
+  vertical-align: middle;
+}
+
 .node {
   position: absolute;
   width: var(--size);
@@ -1147,6 +1186,255 @@ button.node:active {
   display: flex;
   align-items: baseline;
   gap: 16px;
+}
+
+/* Switch between the team-comp builder and the Ignite ban-pick simulator. */
+.comp-mode-switch {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.comp-mode-switch button {
+  border: 0;
+  border-radius: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.comp-mode-switch button.active {
+  background: var(--gold);
+  color: #08101d;
+  font-weight: 800;
+}
+
+.force-hidden {
+  display: none !important;
+}
+
+/* ---- Ignite ban-pick simulator ---- */
+.ignite-sim {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ignite-sim.hidden {
+  display: none;
+}
+
+.ignite-columns {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.ignite-team {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(9, 14, 28, 0.55);
+}
+
+.ignite-team.team-a {
+  border-color: rgba(81, 194, 255, 0.4);
+}
+
+.ignite-team.team-b {
+  border-color: rgba(255, 91, 130, 0.4);
+}
+
+.ignite-team-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ignite-team-name {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.team-a .ignite-team-name { color: var(--vanguard); }
+.team-b .ignite-team-name { color: var(--duelist); }
+
+.ignite-team-sub {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.ignite-slots {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ignite-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  font-size: 11.5px;
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.ignite-chip.filled {
+  border-style: solid;
+  color: var(--text);
+}
+
+.ignite-chip.ban.filled {
+  border-color: rgba(255, 91, 130, 0.55);
+  background: rgba(255, 91, 130, 0.08);
+}
+
+.ignite-chip.protect.filled {
+  border-color: rgba(76, 240, 181, 0.55);
+  background: rgba(76, 240, 181, 0.08);
+}
+
+.ignite-chip.arming {
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(255, 220, 73, 0.25);
+}
+
+.ignite-chip img,
+.ignite-chip .fallback-face {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ignite-chip:not(.filled) {
+  padding: 6px 12px;
+}
+
+.ignite-chip-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.ignite-chip-name {
+  font-weight: 700;
+}
+
+.ignite-chip-impact {
+  font-size: 9.5px;
+  color: var(--muted);
+}
+
+.ignite-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 320px;
+}
+
+.ignite-view-label {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ignite-view-switch {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.ignite-view-switch button {
+  border: 0;
+  border-radius: 0;
+  padding: 6px 14px;
+  font-size: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.ignite-view-switch button.active {
+  background: var(--gold);
+  color: #08101d;
+}
+
+#igniteClear {
+  width: fit-content;
+  padding: 5px 12px;
+  font-size: 11.5px;
+}
+
+.ignite-format-note {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.ignite-impact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ignite-impact p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.ignite-impact strong {
+  color: var(--text);
+}
+
+.ignite-notice {
+  color: var(--duelist) !important;
+  font-weight: 700;
+}
+
+.ignite-hint-line {
+  color: var(--gold) !important;
+}
+
+.ignite-dry strong {
+  color: var(--duelist) !important;
+}
+
+/* Banned-out icons on the board: colorless (handled by .colorless) plus an
+   unmissable ✕ so a shut-down hero can't be mistaken for a preview node. */
+.node.ignite-banned .node-core::after {
+  content: "✕";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--size) * 0.52);
+  font-weight: 800;
+  color: rgba(255, 91, 130, 0.85);
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
 }
 
 .comp-head h3 {
