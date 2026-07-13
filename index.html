@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Marvel Rivals S9 Team-Up Builder</title>
-    <link rel="stylesheet" href="./styles.css?v=36">
+    <link rel="stylesheet" href="./styles.css?v=37">
   </head>
   <body>
     <div class="app-shell">
@@ -189,28 +189,19 @@
           </div>
           <div class="comp-detail hidden" id="compDetail"></div>
           <div class="ignite-sim hidden" id="ignitePanel">
-            <div class="ignite-columns">
-              <div class="ignite-team team-a">
-                <div class="ignite-team-head"><span class="ignite-team-name">Team A</span><span class="ignite-team-sub">bans remove heroes from Team B's pool</span></div>
-                <div class="ignite-slots" id="igniteBansA"></div>
-                <div class="ignite-slots" id="igniteProtectsA"></div>
-              </div>
-              <div class="ignite-team team-b">
-                <div class="ignite-team-head"><span class="ignite-team-name">Team B</span><span class="ignite-team-sub">bans remove heroes from Team A's pool</span></div>
-                <div class="ignite-slots" id="igniteBansB"></div>
-                <div class="ignite-slots" id="igniteProtectsB"></div>
-              </div>
-              <div class="ignite-controls">
-                <span class="ignite-view-label">Board shows the pool of</span>
-                <div class="ignite-view-switch" role="group" aria-label="Board perspective">
-                  <button id="igniteViewA" type="button" class="active">Team A</button>
-                  <button id="igniteViewB" type="button">Team B</button>
-                </div>
-                <button id="igniteClear" type="button" title="Clear every ban and protect">Clear all</button>
-                <p class="ignite-format-note">Ignite format: 3 bans + 2 protects per team. A ban only blocks the <em>enemy</em> team; a protect makes that hero unbannable for your side.</p>
+            <div class="ignite-seq-bar">
+              <div class="ignite-seq" id="igniteSeq"></div>
+              <div class="ignite-seq-actions">
+                <button id="ignitePause" type="button" title="Pause the draft so hero clicks select/inspect as normal, without drafting">Pause drafting</button>
+                <button id="igniteSkip" type="button" title="Skip the current step — captains may choose not to ban or lock">Skip step</button>
+                <button id="igniteUndo" type="button" title="Take back the most recent draft step">Undo step</button>
+                <button id="igniteReset" type="button" title="Clear the whole draft and both team comps">Reset draft</button>
               </div>
             </div>
+            <p class="ignite-current" id="igniteCurrent"></p>
+            <div class="ignite-comps" id="igniteComps"></div>
             <div class="ignite-impact" id="igniteImpact"></div>
+            <p class="ignite-format-note">Official Ignite ban &amp; lock sequence (Tournament Advanced): A ban → B ban → B lock → A lock → A ban → B ban → B lock → A lock → A ban → B ban. Locked heroes can't be banned; steps can be skipped; up to 6 heroes end up banned for <em>both</em> teams.</p>
           </div>
         </section>
 
@@ -221,6 +212,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=36"></script>
+    <script src="./app.js?v=37"></script>
   </body>
 </html>

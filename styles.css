@@ -1229,59 +1229,124 @@ button.node:active {
   display: none;
 }
 
-.ignite-columns {
+/* The 10-step official sequence strip. */
+.ignite-seq-bar {
   display: flex;
-  gap: 18px;
   align-items: flex-start;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-.ignite-team {
+.ignite-seq {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.ignite-step {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 72px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 10px;
+  color: var(--muted);
+  background: rgba(9, 14, 28, 0.55);
+}
+
+.ignite-step.team-a { border-color: rgba(81, 194, 255, 0.4); }
+.ignite-step.team-b { border-color: rgba(255, 91, 130, 0.4); }
+
+.ignite-step-head {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ignite-step.team-a .ignite-step-head { color: var(--vanguard); }
+.ignite-step.team-b .ignite-step-head { color: var(--duelist); }
+
+.ignite-step.lock .ignite-step-head::after { content: " 🔒"; }
+.ignite-step.ban .ignite-step-head::after { content: " 🚫"; }
+
+.ignite-step-hero {
+  font-size: 10.5px;
+  color: var(--text);
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ignite-step:not(.done) .ignite-step-hero {
+  color: var(--muted);
+}
+
+.ignite-step.current {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(255, 220, 73, 0.3);
+}
+
+.ignite-seq-actions {
+  display: flex;
   gap: 6px;
-  padding: 8px 10px;
+  flex-wrap: wrap;
+}
+
+.ignite-seq-actions button {
+  padding: 5px 10px;
+  font-size: 11.5px;
+}
+
+.ignite-current {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.ignite-current strong {
+  color: var(--gold);
+}
+
+/* Post-draft comp builders, one row per team. */
+.ignite-comps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ignite-comp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(9, 14, 28, 0.55);
 }
 
-.ignite-team.team-a {
-  border-color: rgba(81, 194, 255, 0.4);
-}
+.ignite-comp-row.team-a { border-color: rgba(81, 194, 255, 0.4); }
+.ignite-comp-row.team-b { border-color: rgba(255, 91, 130, 0.4); }
 
-.ignite-team.team-b {
-  border-color: rgba(255, 91, 130, 0.4);
-}
-
-.ignite-team-head {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.ignite-team-name {
-  font-size: 12px;
+.ignite-comp-label {
+  min-width: 110px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.team-a .ignite-team-name { color: var(--vanguard); }
-.team-b .ignite-team-name { color: var(--duelist); }
+.ignite-comp-row.team-a .ignite-comp-label { color: var(--vanguard); }
+.ignite-comp-row.team-b .ignite-comp-label { color: var(--duelist); }
 
-.ignite-team-sub {
-  font-size: 10.5px;
-  color: var(--muted);
-}
-
-.ignite-slots {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.ignite-chip {
+.ignite-comp-slot {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1293,105 +1358,52 @@ button.node:active {
   color: var(--muted);
 }
 
-.ignite-chip.filled {
+.ignite-comp-slot.filled {
   border-style: solid;
   color: var(--text);
 }
 
-.ignite-chip.ban.filled {
-  border-color: rgba(255, 91, 130, 0.55);
-  background: rgba(255, 91, 130, 0.08);
-}
-
-.ignite-chip.protect.filled {
-  border-color: rgba(76, 240, 181, 0.55);
+.ignite-comp-slot.locked {
+  border-color: rgba(76, 240, 181, 0.6);
   background: rgba(76, 240, 181, 0.08);
 }
 
-.ignite-chip.arming {
+.ignite-comp-slot.arming {
   border-color: var(--gold);
   color: var(--gold);
   box-shadow: 0 0 0 2px rgba(255, 220, 73, 0.25);
 }
 
-.ignite-chip img,
-.ignite-chip .fallback-face {
+.ignite-comp-slot:not(.filled) {
+  min-width: 34px;
+  justify-content: center;
+  padding: 6px 10px;
+}
+
+.ignite-comp-slot img,
+.ignite-comp-slot .fallback-face {
   width: 26px;
   height: 26px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-.ignite-chip:not(.filled) {
-  padding: 6px 12px;
-}
-
-.ignite-chip-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.2;
-}
-
-.ignite-chip-name {
+.ignite-comp-name {
   font-weight: 700;
 }
 
-.ignite-chip-impact {
-  font-size: 9.5px;
-  color: var(--muted);
-}
-
-.ignite-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 320px;
-}
-
-.ignite-view-label {
-  font-size: 10.5px;
+.ignite-lock-tag {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--strategist);
+  background: rgba(76, 240, 181, 0.14);
 }
 
-.ignite-view-switch {
-  display: flex;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-  width: fit-content;
-}
-
-.ignite-view-switch button {
-  border: 0;
-  border-radius: 0;
-  padding: 6px 14px;
-  font-size: 12px;
-  background: transparent;
-  color: var(--muted);
-  font-weight: 700;
-}
-
-.ignite-view-switch button.active {
-  background: var(--gold);
-  color: #08101d;
-}
-
-#igniteClear {
-  width: fit-content;
-  padding: 5px 12px;
-  font-size: 11.5px;
-}
-
-.ignite-format-note {
-  margin: 0;
-  font-size: 10.5px;
-  line-height: 1.45;
-  color: var(--muted);
-}
-
+/* Factual impact readout (deliberately no draft advice). */
 .ignite-impact {
   display: flex;
   flex-direction: column;
@@ -1414,12 +1426,38 @@ button.node:active {
   font-weight: 700;
 }
 
-.ignite-hint-line {
-  color: var(--gold) !important;
-}
-
 .ignite-dry strong {
   color: var(--duelist) !important;
+}
+
+.ignite-format-note {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* World-space board divider between the two teams' halves. */
+.ignite-divider {
+  stroke: rgba(226, 232, 245, 0.28);
+  stroke-width: 3;
+  stroke-dasharray: 14 12;
+}
+
+.ignite-side-label {
+  font-size: 64px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-anchor: middle;
+  opacity: 0.5;
+}
+
+.ignite-side-label.team-a { fill: var(--vanguard); }
+.ignite-side-label.team-b { fill: var(--duelist); }
+
+/* Locked heroes keep their color and gain a "saved" ring. */
+.node.ignite-locked .node-core {
+  box-shadow: 0 0 0 4px rgba(76, 240, 181, 0.65);
 }
 
 /* Banned-out icons on the board: colorless (handled by .colorless) plus an
