@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Marvel Rivals S9 Team-Up Builder</title>
-    <link rel="stylesheet" href="./styles.css?v=38">
+    <link rel="stylesheet" href="./styles.css?v=39">
   </head>
   <body>
     <div class="app-shell">
@@ -84,6 +84,21 @@
             <div class="empty-state" id="emptyState">
               <h3>Choose a starting hero</h3>
               <p>The first click creates a local relationship map. Click any node to see its own Team-Up partners and who it enhances.</p>
+            </div>
+          </div>
+          <div id="igniteBoard" class="ignite-board hidden" aria-label="Ignite ban-pick split board">
+            <div class="ignite-board-toolbar">
+              <button id="igniteColorlessToggle" type="button" class="active" title="When on, only each team's 6 comp heroes stay in full color — everyone else dims until you click them. Turn off to show every hero in full color.">Colorless mode: On</button>
+              <button id="exportIgniteImage" type="button" title="Download a shareable recap picture: every ban and lock on both sides, numbered in draft order">📷 Ignite image</button>
+            </div>
+            <div class="ignite-board-panes">
+              <div class="ignite-board-pane team-a" id="igniteBoardPaneA">
+                <h3 class="ignite-board-pane-title">Team A</h3>
+              </div>
+              <div class="ignite-board-divider" aria-hidden="true"></div>
+              <div class="ignite-board-pane team-b" id="igniteBoardPaneB">
+                <h3 class="ignite-board-pane-title">Team B</h3>
+              </div>
             </div>
           </div>
           <aside id="detailPanel" class="detail-panel hidden" aria-label="Selected hero relationships"></aside>
@@ -212,6 +227,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=38"></script>
+    <script src="./app.js?v=39"></script>
   </body>
 </html>

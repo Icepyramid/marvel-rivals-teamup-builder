@@ -1274,6 +1274,31 @@ button.node:active {
 .ignite-step.lock .ignite-step-head::after { content: " 🔒"; }
 .ignite-step.ban .ignite-step-head::after { content: " 🚫"; }
 
+.ignite-step-thumb {
+  display: block;
+  width: 30px;
+  height: 30px;
+  margin: 2px 0;
+}
+
+.ignite-step-thumb img,
+.ignite-step-thumb .fallback-face {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--line);
+}
+
+.ignite-step-thumb .fallback-face {
+  display: grid;
+  place-items: center;
+  background: #10182d;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
 .ignite-step-hero {
   font-size: 10.5px;
   color: var(--text);
@@ -1363,11 +1388,6 @@ button.node:active {
   color: var(--text);
 }
 
-.ignite-comp-slot.locked {
-  border-color: rgba(76, 240, 181, 0.6);
-  background: rgba(76, 240, 181, 0.08);
-}
-
 .ignite-comp-slot.arming {
   border-color: var(--gold);
   color: var(--gold);
@@ -1390,17 +1410,6 @@ button.node:active {
 
 .ignite-comp-name {
   font-weight: 700;
-}
-
-.ignite-lock-tag {
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--strategist);
-  background: rgba(76, 240, 181, 0.14);
 }
 
 /* Factual impact readout (deliberately no draft advice). */
@@ -1437,24 +1446,6 @@ button.node:active {
   color: var(--muted);
 }
 
-/* World-space board divider between the two teams' halves. */
-.ignite-divider {
-  stroke: rgba(226, 232, 245, 0.28);
-  stroke-width: 3;
-  stroke-dasharray: 14 12;
-}
-
-.ignite-side-label {
-  font-size: 64px;
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  text-anchor: middle;
-  opacity: 0.5;
-}
-
-.ignite-side-label.team-a { fill: var(--vanguard); }
-.ignite-side-label.team-b { fill: var(--duelist); }
-
 /* Locked heroes keep their color and gain a "saved" ring. */
 .node.ignite-locked .node-core {
   box-shadow: 0 0 0 4px rgba(76, 240, 181, 0.65);
@@ -1473,6 +1464,131 @@ button.node:active {
   color: rgba(255, 91, 130, 0.85);
   text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
   pointer-events: none;
+}
+
+/* ---- Ignite independent split board (replaces the main #board while
+   Ignite mode is on) — Team A and Team B are two fully separate panes with
+   their own local hero sets, so the same hero can legitimately appear on
+   both sides and no link is ever drawn between the two halves. ---- */
+.ignite-board {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+  overflow: hidden;
+}
+
+.ignite-board.hidden {
+  display: none;
+}
+
+.ignite-board-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#igniteColorlessToggle.active {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.ignite-board-panes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 0;
+}
+
+.ignite-board-pane {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 4px 16px 24px;
+}
+
+.ignite-board-divider {
+  width: 1px;
+  flex-shrink: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(226, 232, 245, 0.28) 0,
+    rgba(226, 232, 245, 0.28) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+}
+
+.ignite-board-pane-title {
+  margin: 6px 0 10px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.ignite-board-pane.team-a .ignite-board-pane-title { color: var(--vanguard); }
+.ignite-board-pane.team-b .ignite-board-pane-title { color: var(--duelist); }
+
+.ignite-pane-empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ignite-section {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.ignite-section-title {
+  margin: 0 0 24px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ignite-icon-grid {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px 22px;
+}
+
+/* Reuses the main board's `.node`/`.node-core`/`.node-badge`/`.node-label`
+   (and `.colorless`/`.selected`/`.ignite-banned` state classes) for visual
+   consistency, but overrides the absolute free-placement positioning with
+   normal flex flow since these icons are laid out automatically, not dragged. */
+.node.ignite-icon {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  cursor: pointer;
+}
+
+.ignite-pane-links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+}
+
+.ignite-pane-link {
+  stroke: rgba(226, 232, 245, 0.22);
+  stroke-width: 2;
+}
+
+.ignite-pane-link.colored {
+  stroke: #3ddc71;
+  stroke-width: 2.5;
 }
 
 .comp-head h3 {

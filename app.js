@@ -2244,29 +2244,6 @@ function renderLinks() {
       </marker>
     </defs>
   `;
-  // Ignite mode: a world-space divider splits the board into Team A's half
-  // (left) and Team B's half (right), so both teams' draft actions stay
-  // visually separate. Drawn in world coordinates so it pans/zooms with
-  // the nodes.
-  if (igniteOn) {
-    const divider = document.createElementNS(SVG_NS, "line");
-    divider.setAttribute("x1", 0);
-    divider.setAttribute("y1", -1150);
-    divider.setAttribute("x2", 0);
-    divider.setAttribute("y2", 1250);
-    divider.classList.add("ignite-divider");
-    linkLayer.append(divider);
-    const sideLabel = (text, x, cls) => {
-      const label = document.createElementNS(SVG_NS, "text");
-      label.setAttribute("x", x);
-      label.setAttribute("y", -1000);
-      label.classList.add("ignite-side-label", cls);
-      label.textContent = text;
-      linkLayer.append(label);
-    };
-    sideLabel("TEAM A", -750, "team-a");
-    sideLabel("TEAM B", 750, "team-b");
-  }
   const filtered = linkFilter !== "all" && state.selected;
   const visibleLinkCount = new Map();
   for (const [id, link] of state.links) {
@@ -2308,13 +2285,10 @@ function renderLinks() {
     linkLayer.append(hit);
 
     const manuallyHidden = state.hiddenLinks.has(id);
-    // Colorless if unconfirmed ("preview"), if a board role filter is
-    // active and neither endpoint is related to that role (Flex is exempt),
-    // or if the Ignite simulator says either endpoint is banned out of the
-    // currently viewed team's pool — that Team-Up is shut down for them.
+    // Colorless if unconfirmed ("preview"), or if a board role filter is
+    // active and neither endpoint is related to that role (Flex is exempt).
     const roleRelated = !boardRoleFilter || !roleFilterDimmed(link.source) || !roleFilterDimmed(link.target);
-    const igniteDead = igniteShutdown(link.source) || igniteShutdown(link.target);
-    const colorless = link.preview || !roleRelated || igniteDead;
+    const colorless = link.preview || !roleRelated;
     // While a role filter is active, colorless links disappear entirely
     // instead of showing dim/gray, to declutter the filtered view.
     const hideForRoleFilter = boardRoleFilter && colorless;
@@ -2338,10 +2312,7 @@ function renderLinks() {
   for (const [hero, node] of state.nodes) {
     const show = !filtered || hero === state.selected || (visibleLinkCount.get(hero) || 0) > 0;
     node.el.style.display = show ? "" : "none";
-    const banned = igniteShutdown(hero);
-    node.el.classList.toggle("colorless", !!node.preview || roleFilterDimmed(hero) || banned);
-    node.el.classList.toggle("ignite-banned", banned);
-    node.el.classList.toggle("ignite-locked", igniteOn && !!igniteLockedBy(hero));
+    node.el.classList.toggle("colorless", !!node.preview || roleFilterDimmed(hero));
   }
 }
 
@@ -2751,17 +2722,20 @@ document.querySelector("#compOnlyView").addEventListener("click", toggleCompOnly
 // the Marvel Rivals Ignite tournament rules): A ban → B ban → B lock →
 // A lock → A ban → B ban → B lock → A lock → A ban → B ban. Locked heroes
 // cannot be banned later; captains may skip a step; up to 6 heroes end up
-// banned FROM THE MATCH (bans are global — both teams lose them). After
-// the draft, each team builds a 6-hero comp from what's left: banned
-// heroes are unpickable, locked heroes are already committed to the team
-// that locked them.
-// Board behavior: entering the simulator snapshots and clears your board;
-// every drafted hero lands on a split board (Team A's actions left of the
-// divider, Team B's right) together with its direct Team-Up web, so the
-// links each ban kills and each lock saves are visible immediately. The
-// original board is restored on exit. Deliberately NO draft advice — pros
-// draft on meta knowledge, not link counts.
-const IGNITE_KEY = "teamup-ignite-sim-v2";
+// banned FROM THE MATCH (bans are global — both teams lose them). Locking
+// a hero ONLY protects it from being banned — it does NOT commit that hero
+// to the locking team's comp; after the draft, either team is free to pick
+// any non-banned hero (locked or not) into their own 6-hero comp, exactly
+// like the real rules ("Participants can then choose other heroes from
+// those available").
+// Board: Team A and Team B each get a fully independent split pane (same
+// hero can legitimately appear on both sides — e.g. a hero Team A locked
+// defensively that Team B ends up picking) and no link is ever drawn
+// between the two panes. By default only each team's 6 comp picks show in
+// full color — everything else (bans, locks, related heroes) is dimmed
+// until clicked, or until "Colorless mode" is switched off. Deliberately
+// NO draft advice — pros draft on meta knowledge, not link counts.
+const IGNITE_KEY = "teamup-ignite-sim-v3";
 const IGNITE_SKIPPED = "__skipped__";
 const IGNITE_SEQUENCE = [
   { team: "A", kind: "ban" }, { team: "B", kind: "ban" },
@@ -2773,22 +2747,26 @@ const IGNITE_SEQUENCE = [
 const TOTAL_TEAMUPS = Object.values(relationships).reduce((sum, list) => sum + list.length, 0);
 
 let igniteOn = false;
-let igniteSnapshot = null;
 let igniteDraftPaused = false; // pause hero-click capture to inspect heroes mid-draft
 let igniteArming = null;       // comp-slot arming after the draft: { team, index }
 let igniteNoticeText = "";
-// Per-team anchor counters for split-board placement; rebuilt with the board.
-const igniteAnchorCount = { A: 0, B: 0 };
+// Per-pane "reveal by click" focus — independent per team, cleared on any
+// draft/comp mutation so it never points at a stale state.
+let igniteFocus = { A: null, B: null };
 
 function loadIgnite() {
   try {
     const saved = JSON.parse(localStorage.getItem(IGNITE_KEY) || "null");
-    if (saved && Array.isArray(saved.steps) && saved.steps.length === IGNITE_SEQUENCE.length) return saved;
+    if (saved && Array.isArray(saved.steps) && saved.steps.length === IGNITE_SEQUENCE.length) {
+      if (typeof saved.colorlessMode !== "boolean") saved.colorlessMode = true;
+      return saved;
+    }
   } catch { /* fall through to default */ }
   return {
     steps: Array(IGNITE_SEQUENCE.length).fill(null),
     compA: Array(6).fill(null),
-    compB: Array(6).fill(null)
+    compB: Array(6).fill(null),
+    colorlessMode: true
   };
 }
 const ignite = loadIgnite();
@@ -2799,10 +2777,6 @@ function saveIgnite() {
 
 function igniteStepIndex() {
   return ignite.steps.findIndex(step => step === null);
-}
-
-function igniteDraftComplete() {
-  return igniteStepIndex() === -1;
 }
 
 function igniteBans() {
@@ -2827,11 +2801,6 @@ function igniteUsedHeroes() {
   return new Set(ignite.steps.filter(hero => hero && hero !== IGNITE_SKIPPED));
 }
 
-// Bans are global (both teams lose the hero), so shutdown has one meaning.
-function igniteShutdown(hero) {
-  return igniteOn && igniteBans().has(hero);
-}
-
 function igniteLockedBy(hero) {
   if (igniteLocks("A").has(hero)) return "A";
   if (igniteLocks("B").has(hero)) return "B";
@@ -2843,75 +2812,13 @@ function igniteNotice(text) {
   renderIgnite();
 }
 
-// Split-board placement: Team A's drafted/picked heroes anchor left of the
-// world-space divider (x = 0), Team B's right, stacked into rows/columns.
-function igniteAnchorPosition(team) {
-  const index = igniteAnchorCount[team]++;
-  const sign = team === "A" ? -1 : 1;
-  const row = index % 4;
-  const col = Math.floor(index / 4);
-  return { x: sign * (750 + col * 780), y: -560 + row * 400 };
-}
-
-// Place one drafted/picked hero on its team's half. Draft actions (ban or
-// lock) also fan out the hero's direct Team-Up web as satellites so the
-// affected links are immediately visible; comp picks just link to whatever
-// related heroes are already on the board.
-function igniteAddHeroToBoard(hero, team, kind) {
-  const pos = igniteAnchorPosition(team);
-  const existing = state.nodes.get(hero);
-  if (existing) {
-    existing.x = pos.x;
-    existing.y = pos.y;
-    positionNode(existing);
-  } else {
-    addNode(hero, pos.x, pos.y);
-  }
-  const neighbors = [...new Set([...(relationships[hero] || []), ...(incoming[hero] || [])])];
-  if (kind !== "pick") {
-    // Fan satellites away from the divider so the halves stay readable.
-    const midAngle = team === "A" ? Math.PI : 0;
-    const fresh = neighbors.filter(n => !state.nodes.has(n));
-    fresh.forEach((neighbor, i) => {
-      const p = arcPosition(pos, i, fresh.length, midAngle, 330);
-      addNode(neighbor, p.x, p.y);
-    });
-  }
-  for (const receiver of relationships[hero] || []) addLink(hero, receiver, "outgoing");
-  for (const provider of incoming[hero] || []) addLink(provider, hero, "incoming");
-}
-
-// Rebuild the whole split board from the saved draft + comps (used on
-// enter, undo, reset, and comp-slot clears — additions are incremental).
-function rebuildIgniteBoard() {
-  state.nodes.forEach(n => n.el.remove());
-  state.nodes.clear();
-  state.links.clear();
-  state.hiddenLinks.clear();
-  state.selected = null;
-  clearMultiSelection();
-  emptyState.style.display = "none";
-  detailPanel.classList.add("hidden");
-  detailPanel.innerHTML = "";
-  igniteAnchorCount.A = 0;
-  igniteAnchorCount.B = 0;
-  IGNITE_SEQUENCE.forEach((step, i) => {
-    const hero = ignite.steps[i];
-    if (hero && hero !== IGNITE_SKIPPED) igniteAddHeroToBoard(hero, step.team, step.kind);
-  });
-  for (const team of ["A", "B"]) {
-    const locks = igniteLocks(team);
-    for (const hero of ignite[`comp${team}`]) {
-      if (hero && !locks.has(hero)) igniteAddHeroToBoard(hero, team, "pick");
-    }
-  }
-  renderLinks();
-  updateStats();
-  if (state.nodes.size) autoFit();
+function igniteKindLabel(kind) {
+  return kind === "ban" ? "ban" : "lock";
 }
 
 // Returns true when the click was consumed by the simulator (draft step or
-// an armed comp slot).
+// an armed comp slot) — callers (sidebar/board/panel hero clicks) fall
+// through to their normal behavior when this returns false.
 function igniteAssign(hero) {
   if (!igniteOn) return false;
   const stepIndex = igniteStepIndex();
@@ -2927,17 +2834,10 @@ function igniteAssign(hero) {
       return true;
     }
     ignite.steps[stepIndex] = hero;
-    if (step.kind === "lock") {
-      const comp = ignite[`comp${step.team}`];
-      const free = comp.findIndex(slot => !slot);
-      if (free !== -1) comp[free] = hero;
-    }
     igniteNoticeText = "";
-    igniteAddHeroToBoard(hero, step.team, step.kind);
     saveIgnite();
     renderIgnite();
-    renderLinks();
-    updateStats();
+    renderIgniteBoard();
     return true;
   }
   if (igniteArming) {
@@ -2953,10 +2853,9 @@ function igniteAssign(hero) {
     ignite[`comp${team}`][index] = hero;
     igniteArming = null;
     igniteNoticeText = "";
-    igniteAddHeroToBoard(hero, team, "pick");
     saveIgnite();
     renderIgnite();
-    renderLinks();
+    renderIgniteBoard();
     return true;
   }
   return false;
@@ -2969,25 +2868,19 @@ function igniteSkipStep() {
   igniteNoticeText = "";
   saveIgnite();
   renderIgnite();
+  renderIgniteBoard();
 }
 
 function igniteUndoStep() {
   let last = -1;
   for (let i = 0; i < ignite.steps.length; i++) if (ignite.steps[i] !== null) last = i;
   if (last === -1) return;
-  const hero = ignite.steps[last];
-  const step = IGNITE_SEQUENCE[last];
   ignite.steps[last] = null;
-  if (hero !== IGNITE_SKIPPED && step.kind === "lock") {
-    const comp = ignite[`comp${step.team}`];
-    const at = comp.indexOf(hero);
-    if (at !== -1) comp[at] = null;
-  }
   igniteArming = null;
   igniteNoticeText = "";
   saveIgnite();
-  rebuildIgniteBoard();
   renderIgnite();
+  renderIgniteBoard();
 }
 
 function igniteResetDraft() {
@@ -2996,20 +2889,17 @@ function igniteResetDraft() {
   ignite.compB = Array(6).fill(null);
   igniteArming = null;
   igniteNoticeText = "";
+  igniteFocus = { A: null, B: null };
   saveIgnite();
-  rebuildIgniteBoard();
   renderIgnite();
-}
-
-function igniteKindLabel(kind) {
-  return kind === "ban" ? "ban" : "lock";
+  renderIgniteBoard();
 }
 
 function renderIgnite() {
   if (!igniteOn) return;
   const stepIndex = igniteStepIndex();
 
-  // Sequence strip: the 10 official steps in order.
+  // Sequence strip: the 10 official steps in order, each with a hero thumbnail.
   const seq = document.querySelector("#igniteSeq");
   seq.innerHTML = "";
   IGNITE_SEQUENCE.forEach((step, i) => {
@@ -3018,9 +2908,21 @@ function renderIgnite() {
       + (i === stepIndex ? " current" : "")
       + (ignite.steps[i] ? " done" : "");
     const hero = ignite.steps[i];
-    const what = hero === IGNITE_SKIPPED ? "skipped" : (hero || "…");
-    chip.innerHTML = `<span class="ignite-step-head">${step.team} ${igniteKindLabel(step.kind)}</span><span class="ignite-step-hero">${what}</span>`;
-    chip.title = `Step ${i + 1} of ${IGNITE_SEQUENCE.length}: Team ${step.team} ${step.kind === "ban" ? "bans a hero" : "locks a hero (protecting it from bans)"}`;
+    const head = document.createElement("span");
+    head.className = "ignite-step-head";
+    head.textContent = `${step.team} ${igniteKindLabel(step.kind)}`;
+    chip.append(head);
+    if (hero && hero !== IGNITE_SKIPPED) {
+      const thumb = document.createElement("span");
+      thumb.className = "ignite-step-thumb";
+      thumb.append(makeFace(hero));
+      chip.append(thumb);
+    }
+    const heroLine = document.createElement("span");
+    heroLine.className = "ignite-step-hero";
+    heroLine.textContent = hero === IGNITE_SKIPPED ? "skipped" : (hero || "…");
+    chip.append(heroLine);
+    chip.title = `Step ${i + 1} of ${IGNITE_SEQUENCE.length}: Team ${step.team} ${step.kind === "ban" ? "bans a hero" : "locks a hero (protecting it from bans — locking does NOT add it to their comp)"}`;
     seq.append(chip);
   });
 
@@ -3032,13 +2934,14 @@ function renderIgnite() {
       ? `Drafting paused — hero clicks select/inspect as normal. Resume to continue the draft.`
       : `<strong>Step ${stepIndex + 1}/${IGNITE_SEQUENCE.length} — Team ${step.team} ${igniteKindLabel(step.kind)}s a hero:</strong> click any hero (sidebar, board, or detail panel).`;
   } else {
-    current.innerHTML = `<strong>Draft complete.</strong> Build each team's comp below — banned heroes are unpickable, locked heroes are already in.`;
+    current.innerHTML = `<strong>Draft complete.</strong> Build each team's comp below — banned heroes are unpickable; locked heroes are simply guaranteed available, not auto-added.`;
   }
   document.querySelector("#ignitePause").textContent = igniteDraftPaused ? "Resume drafting" : "Pause drafting";
   document.querySelector("#ignitePause").classList.toggle("force-hidden", stepIndex === -1);
   document.querySelector("#igniteSkip").classList.toggle("force-hidden", stepIndex === -1);
 
-  // Post-draft comp builders (one row per team).
+  // Post-draft comp builders (one row per team) — freely editable, no
+  // "locked into comp" restriction; locking only ever protected from bans.
   const comps = document.querySelector("#igniteComps");
   comps.innerHTML = "";
   if (stepIndex === -1) {
@@ -3049,40 +2952,35 @@ function renderIgnite() {
       label.className = "ignite-comp-label";
       label.textContent = `Team ${team} comp`;
       row.append(label);
-      const locks = igniteLocks(team);
       ignite[`comp${team}`].forEach((hero, index) => {
         const slot = document.createElement("button");
         slot.type = "button";
-        const locked = hero && locks.has(hero);
         const arming = igniteArming && igniteArming.team === team && igniteArming.index === index;
-        slot.className = "ignite-comp-slot" + (hero ? " filled" : "") + (locked ? " locked" : "") + (arming ? " arming" : "");
+        slot.className = "ignite-comp-slot" + (hero ? " filled" : "") + (arming ? " arming" : "");
         if (hero) {
           slot.append(makeFace(hero));
           const name = document.createElement("span");
           name.className = "ignite-comp-name";
-          name.innerHTML = `${hero}${locked ? ` <span class="ignite-lock-tag">locked</span>` : ""}`;
+          name.textContent = hero;
           slot.append(name);
-          slot.title = locked
-            ? `${hero} — locked during the draft, committed to Team ${team}.`
-            : `${hero} — right-click to clear this slot.`;
+          slot.title = `${hero} — right-click to clear this slot.`;
         } else {
           slot.textContent = arming ? "Click any hero…" : "+";
           slot.title = "Click to arm this slot, then click any hero to pick them.";
         }
         slot.addEventListener("click", () => {
-          if (locked) return;
           igniteArming = arming ? null : { team, index };
           igniteNoticeText = "";
           renderIgnite();
         });
         slot.addEventListener("contextmenu", event => {
           event.preventDefault();
-          if (locked || !hero) return;
+          if (!hero) return;
           ignite[`comp${team}`][index] = null;
           igniteArming = null;
           saveIgnite();
-          rebuildIgniteBoard();
           renderIgnite();
+          renderIgniteBoard();
         });
         row.append(slot);
       });
@@ -3104,7 +3002,7 @@ function renderIgnite() {
     const killed = teamupsKilledBy(banned);
     const summary = document.createElement("p");
     summary.className = "ignite-summary";
-    summary.innerHTML = `<strong>${banned.size} hero${banned.size === 1 ? "" : "es"} banned from the match</strong> — ${killed.length} of ${TOTAL_TEAMUPS} Team-Ups shut down for both teams (colorless on the board).`;
+    summary.innerHTML = `<strong>${banned.size} hero${banned.size === 1 ? "" : "es"} banned from the match</strong> — ${killed.length} of ${TOTAL_TEAMUPS} Team-Ups shut down for both teams.`;
     impact.append(summary);
     const dry = heroes.filter(hero =>
       !banned.has(hero)
@@ -3131,6 +3029,154 @@ function teamupsKilledBy(bannedSet) {
   return killed;
 }
 
+// ---- Independent split board: Team A and Team B are two fully separate
+// panes, each with its own hero set, so the same hero can appear on both
+// sides at once and no link is ever drawn across the divider. ----
+
+// Colored (full role color) if: banned → never; else in that team's comp →
+// always; else colorless-mode is off → always; else only if actively
+// clicked-to-focus on that pane.
+function igniteHeroColored(hero, team) {
+  if (igniteBans().has(hero)) return false;
+  if (ignite[`comp${team}`].includes(hero)) return true;
+  if (!ignite.colorlessMode) return true;
+  return igniteFocus[team] === hero;
+}
+
+// Hero set for one team's pane: every hero relevant to THAT team's own
+// actions (their locks + their comp picks), the shared global bans (shown
+// on both sides since a ban affects everyone), and direct Team-Up partners
+// of the team's locks/comp picks so the surviving relationships are visible.
+function igniteHeroesForPane(team) {
+  const banned = igniteBans();
+  const locked = igniteLocks(team);
+  const comp = new Set(ignite[`comp${team}`].filter(Boolean));
+  const core = new Set([...banned, ...locked, ...comp]);
+  const satellites = new Set();
+  for (const hero of new Set([...locked, ...comp])) {
+    for (const partner of [...(relationships[hero] || []), ...(incoming[hero] || [])]) {
+      if (!core.has(partner)) satellites.add(partner);
+    }
+  }
+  return { banned, locked, comp, satellites };
+}
+
+function igniteBoardIcon(hero, team) {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = `node ignite-icon ${cssRole(hero)}`;
+  el.style.setProperty("--role-color", roleColors[roleOf(hero)]);
+  el.style.setProperty("--size", "72px");
+  const isBanned = igniteBans().has(hero);
+  const colored = igniteHeroColored(hero, team);
+  el.classList.toggle("colorless", !colored);
+  el.classList.toggle("ignite-banned", isBanned);
+  el.classList.toggle("ignite-locked", !isBanned && igniteLocks(team).has(hero));
+  el.classList.toggle("selected", !isBanned && igniteFocus[team] === hero);
+  el.dataset.hero = hero;
+
+  const core = document.createElement("span");
+  core.className = "node-core";
+  core.append(makeFace(hero));
+  el.append(core);
+
+  const badge = document.createElement("span");
+  badge.className = "node-badge";
+  badge.textContent = outgoingCount(hero);
+  el.append(badge);
+
+  const label = document.createElement("span");
+  label.className = "node-label";
+  label.textContent = hero;
+  el.append(label);
+
+  el.title = isBanned
+    ? `${hero} — banned from the match.`
+    : (ignite[`comp${team}`].includes(hero) ? `${hero} — in Team ${team}'s comp.` : `${hero} — click to reveal in color.`);
+
+  el.addEventListener("click", () => {
+    if (igniteAssign(hero)) return;
+    igniteFocus[team] = igniteFocus[team] === hero ? null : hero;
+    selectHero(hero);
+    renderIgniteBoard();
+  });
+  return el;
+}
+
+function renderIgnitePane(team) {
+  const pane = document.querySelector(`#igniteBoardPane${team}`);
+  pane.querySelectorAll(".ignite-section, .ignite-pane-links, .ignite-pane-empty").forEach(n => n.remove());
+
+  const { banned, locked, comp, satellites } = igniteHeroesForPane(team);
+  const sections = [
+    { title: "Banned (both teams)", heroes: [...banned].sort(), cls: "banned-section" },
+    { title: `Locked by Team ${team}`, heroes: [...locked].sort(), cls: "locked-section" },
+    { title: `Team ${team} comp`, heroes: [...comp].sort(), cls: "comp-section" },
+    { title: "Related", heroes: [...satellites].sort(), cls: "satellite-section" }
+  ];
+
+  if (!sections.some(s => s.heroes.length)) {
+    const empty = document.createElement("p");
+    empty.className = "ignite-pane-empty";
+    empty.textContent = "No draft actions for this team yet.";
+    pane.append(empty);
+    return;
+  }
+
+  const iconEls = new Map();
+  sections.forEach(section => {
+    if (!section.heroes.length) return;
+    const box = document.createElement("div");
+    box.className = `ignite-section ${section.cls}`;
+    const title = document.createElement("h4");
+    title.className = "ignite-section-title";
+    title.textContent = `${section.title} (${section.heroes.length})`;
+    box.append(title);
+    const grid = document.createElement("div");
+    grid.className = "ignite-icon-grid";
+    section.heroes.forEach(hero => {
+      const icon = igniteBoardIcon(hero, team);
+      iconEls.set(hero, icon);
+      grid.append(icon);
+    });
+    box.append(grid);
+    pane.append(box);
+  });
+
+  // Link lines, drawn only between two heroes BOTH present in this same
+  // pane — the "no links between two teams" requirement is automatically
+  // satisfied since each pane's SVG only ever sees its own icon set.
+  const linkSvg = document.createElementNS(SVG_NS, "svg");
+  linkSvg.classList.add("ignite-pane-links");
+  pane.append(linkSvg);
+  const paneRect = pane.getBoundingClientRect();
+  linkSvg.setAttribute("width", pane.scrollWidth);
+  linkSvg.setAttribute("height", pane.scrollHeight);
+  for (const [hero, el] of iconEls) {
+    for (const partner of relationships[hero] || []) {
+      const partnerEl = iconEls.get(partner);
+      if (!partnerEl) continue;
+      const r1 = el.getBoundingClientRect();
+      const r2 = partnerEl.getBoundingClientRect();
+      const line = document.createElementNS(SVG_NS, "line");
+      line.setAttribute("x1", r1.left + r1.width / 2 - paneRect.left + pane.scrollLeft);
+      line.setAttribute("y1", r1.top + r1.height / 2 - paneRect.top + pane.scrollTop);
+      line.setAttribute("x2", r2.left + r2.width / 2 - paneRect.left + pane.scrollLeft);
+      line.setAttribute("y2", r2.top + r2.height / 2 - paneRect.top + pane.scrollTop);
+      const colored = igniteHeroColored(hero, team) && igniteHeroColored(partner, team);
+      line.classList.add("ignite-pane-link");
+      line.classList.toggle("colored", colored);
+      linkSvg.append(line);
+    }
+  }
+}
+
+function renderIgniteBoard() {
+  if (!igniteOn) return;
+  renderIgnitePane("A");
+  renderIgnitePane("B");
+}
+
 function setBottomMode(mode) {
   const turningOn = mode === "ignite";
   if (turningOn === igniteOn) return;
@@ -3138,25 +3184,24 @@ function setBottomMode(mode) {
   igniteArming = null;
   igniteDraftPaused = false;
   igniteNoticeText = "";
+  igniteFocus = { A: null, B: null };
   document.querySelector("#modeComp").classList.toggle("active", !igniteOn);
   document.querySelector("#modeIgnite").classList.toggle("active", igniteOn);
   document.querySelector("#compSlotsRow").classList.toggle("force-hidden", igniteOn);
   document.querySelector("#compDetail").classList.toggle("force-hidden", igniteOn);
   document.querySelector("#ignitePanel").classList.toggle("hidden", !igniteOn);
+  // Ignite owns its own independent board — the real board/links underneath
+  // are simply hidden, not touched, so nothing needs snapshotting/restoring.
+  board.classList.toggle("force-hidden", igniteOn);
+  linkLayer.classList.toggle("force-hidden", igniteOn);
+  document.querySelector(".zoom-controls").classList.toggle("force-hidden", igniteOn);
+  document.querySelector("#igniteBoard").classList.toggle("hidden", !igniteOn);
   if (igniteOn) {
     document.querySelector("#compStats").textContent = "Ignite ban & lock — official Tournament (Advanced) sequence";
-    igniteSnapshot = snapshotState();
-    loopState.clear();
-    routeState.clear();
-    bulkState.clear();
-    resetView();
-    rebuildIgniteBoard();
     renderIgnite();
+    renderIgniteBoard();
   } else {
-    restoreState(igniteSnapshot);
-    igniteSnapshot = null;
     renderCompStats();
-    renderLinks();
   }
 }
 document.querySelector("#modeComp").addEventListener("click", () => setBottomMode("comp"));
@@ -3167,6 +3212,14 @@ document.querySelector("#igniteReset").addEventListener("click", igniteResetDraf
 document.querySelector("#ignitePause").addEventListener("click", () => {
   igniteDraftPaused = !igniteDraftPaused;
   renderIgnite();
+});
+document.querySelector("#igniteColorlessToggle").addEventListener("click", () => {
+  ignite.colorlessMode = !ignite.colorlessMode;
+  saveIgnite();
+  const btn = document.querySelector("#igniteColorlessToggle");
+  btn.classList.toggle("active", ignite.colorlessMode);
+  btn.textContent = `Colorless mode: ${ignite.colorlessMode ? "On" : "Off"}`;
+  renderIgniteBoard();
 });
 
 // ---- Route finder: pick a start/end hero, show up to 3 shortest routes ----
@@ -4196,6 +4249,93 @@ async function buildCompImageCanvas() {
   return canvas;
 }
 
+// Separate "picture mode" for the Ignite draft: a shareable recap showing
+// every ban/lock step in strict draft order, numbered 1-10 so "what got
+// banned first" reads at a glance — distinct from the live interactive
+// board, which deliberately stays unnumbered/uncluttered.
+async function buildIgniteImageCanvas() {
+  const stepsPerRow = 5;
+  const cellW = 300;
+  const cellH = 210;
+  const rows = Math.ceil(IGNITE_SEQUENCE.length / stepsPerRow);
+  const W = 96 + stepsPerRow * cellW;
+  const headerH = 182;
+  const gridH = rows * cellH + 30;
+  const footerH = 60;
+  const H = headerH + gridH + footerH;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  drawCardBackground(ctx, W, H);
+  const doneCount = ignite.steps.filter(s => s && s !== IGNITE_SKIPPED).length;
+  drawCardHeader(
+    ctx,
+    "MARVEL RIVALS S9 · IGNITE",
+    "Ban & Lock Draft Recap",
+    `Official Tournament (Advanced) sequence · ${doneCount}/${IGNITE_SEQUENCE.length} steps taken`
+  );
+
+  const draftedHeroes = ignite.steps.filter(h => h && h !== IGNITE_SKIPPED);
+  const portraits = new Map();
+  await Promise.all(draftedHeroes.map(async hero => {
+    if (!portraits.has(hero)) portraits.set(hero, await loadLocalPortrait(hero));
+  }));
+
+  const r = 46;
+  IGNITE_SEQUENCE.forEach((step, i) => {
+    const col = i % stepsPerRow;
+    const row = Math.floor(i / stepsPerRow);
+    const cx = 48 + col * cellW + cellW / 2;
+    const cy = headerH + 30 + row * cellH + cellH / 2 - 6;
+    const hero = ignite.steps[i];
+    const isSkipped = hero === IGNITE_SKIPPED;
+    const filled = hero && !isSkipped;
+    const roleColor = step.team === "A" ? "#51c2ff" : "#ff5b82";
+
+    ctx.beginPath();
+    ctx.arc(cx - r - 22, cy - r - 4, 21, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffdc49";
+    ctx.fill();
+    ctx.fillStyle = "#08101d";
+    ctx.font = "800 20px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(String(i + 1), cx - r - 22, cy - r - 3);
+
+    if (filled) {
+      drawHeroCircle(ctx, portraits.get(hero), hero, roleColor, cx, cy, r);
+    } else {
+      ctx.save();
+      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.textAlign = "center";
+    ctx.font = "800 15px Arial";
+    ctx.fillStyle = roleColor;
+    ctx.fillText(`TEAM ${step.team} · ${step.kind.toUpperCase()}`, cx, cy - r - 30);
+
+    ctx.font = "700 16px Arial";
+    ctx.fillStyle = "#f5f7ff";
+    ctx.fillText(filled ? hero : (isSkipped ? "Skipped" : "Not yet drafted"), cx, cy + r + 24);
+
+    if (filled) {
+      ctx.font = "700 12px Arial";
+      ctx.fillStyle = step.kind === "lock" ? "#4cf0b5" : "#ff5b82";
+      ctx.fillText(step.kind === "lock" ? "LOCKED — safe from bans" : "BANNED FROM MATCH", cx, cy + r + 44);
+    }
+  });
+
+  drawCardFooter(ctx, W, H);
+  return canvas;
+}
+
 function downloadCanvas(canvas, filename) {
   const a = document.createElement("a");
   a.href = canvas.toDataURL("image/png");
@@ -4223,3 +4363,4 @@ async function exportImage(buildFn, filenamePrefix, triggerButton) {
 
 document.querySelector("#exportBoardImage").addEventListener("click", event => exportImage(buildBoardImageCanvas, "teamup-board", event.currentTarget));
 document.querySelector("#exportCompImage").addEventListener("click", event => exportImage(buildCompImageCanvas, "teamup-comp", event.currentTarget));
+document.querySelector("#exportIgniteImage").addEventListener("click", event => exportImage(buildIgniteImageCanvas, "teamup-ignite-draft", event.currentTarget));
