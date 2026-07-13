@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Marvel Rivals S9 Team-Up Builder</title>
-    <link rel="stylesheet" href="./styles.css?v=40">
+    <link rel="stylesheet" href="./styles.css?v=41">
   </head>
   <body>
     <div class="app-shell">
@@ -87,6 +87,10 @@
             </div>
           </div>
           <div id="igniteBoard" class="ignite-board hidden" aria-label="Ignite ban-pick split board">
+            <div class="ignite-wip-banner">
+              <span class="ignite-wip-icon" aria-hidden="true">🚧</span>
+              <span class="ignite-wip-text"><strong>Work in progress</strong> — expect bugs and changes.</span>
+            </div>
             <div class="ignite-board-toolbar">
               <button id="igniteColorlessToggle" type="button" class="active" title="When on, only each team's 6 comp heroes stay in full color — everyone else dims until you click them. Turn off to show every hero in full color.">Colorless mode: On</button>
               <button id="exportIgniteImage" type="button" title="Download a shareable recap picture: every ban and lock on both sides, numbered in draft order">📷 Ignite image</button>
@@ -194,7 +198,7 @@
           <div class="comp-head">
             <div class="comp-mode-switch" role="group" aria-label="Bottom area mode">
               <button id="modeComp" type="button" class="active" title="Build a 6-hero team comp">Team comp</button>
-              <button id="modeIgnite" type="button" title="Ignite ban-pick simulator — see how bans and protects shut down Team-Up availability, in the official Ignite series format">Ignite ban-pick</button>
+              <button id="modeIgnite" type="button" title="Ignite ban-pick simulator — see how bans and protects shut down Team-Up availability, in the official Ignite series format. Still a work in progress.">Ignite ban-pick <span class="wip-chip">WORK IN PROGRESS</span></button>
             </div>
             <span id="compStats">0/6 heroes</span>
           </div>
@@ -204,6 +208,10 @@
           </div>
           <div class="comp-detail hidden" id="compDetail"></div>
           <div class="ignite-sim hidden" id="ignitePanel">
+            <div class="ignite-wip-banner">
+              <span class="ignite-wip-icon" aria-hidden="true">🚧</span>
+              <span class="ignite-wip-text"><strong>Work in progress.</strong> The Ignite ban-pick simulator is still being built and tested — expect bugs, layout issues, and behavior that changes without notice. Nothing you do here affects your Team comp board.</span>
+            </div>
             <div class="ignite-seq-bar">
               <div class="ignite-seq" id="igniteSeq"></div>
               <div class="ignite-seq-actions">
@@ -227,6 +235,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=40"></script>
+    <script src="./app.js?v=41"></script>
   </body>
 </html>

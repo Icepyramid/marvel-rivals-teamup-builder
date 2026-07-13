@@ -1214,8 +1214,58 @@ button.node:active {
   font-weight: 800;
 }
 
+.wip-chip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #08101d;
+  background: #ff9a3d;
+  vertical-align: middle;
+  animation: wip-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes wip-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
 .force-hidden {
   display: none !important;
+}
+
+/* Big, unmissable "still being built" notice — shown both above the
+   bottom-panel controls and pinned atop the split board itself, so it's
+   visible however the user scrolled to Ignite mode. */
+.ignite-wip-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 2px solid #ff9a3d;
+  border-radius: 10px;
+  background: rgba(255, 154, 61, 0.14);
+  box-shadow: 0 0 0 1px rgba(255, 154, 61, 0.25) inset;
+}
+
+.ignite-wip-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.ignite-wip-text {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #ffd9ae;
+}
+
+.ignite-wip-text strong {
+  color: #ff9a3d;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* ---- Ignite ban-pick simulator ---- */
